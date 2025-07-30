@@ -1,12 +1,12 @@
 {
 	"private": true,
 	"dependencies": {
-		"@types/firefox-webext-browser": "^67.0.2"
+		"@types/firefox-webext-browser": "^120.0.4"
 	},
 	"devDependencies": {
-		"cson": "^5.1.0",
-		"pug-cli": "^1.0.0-alpha6",
-		"stylus": "^0.54.5",
-		"typescript": "^3.5.3"
+		"cson": "^8.4.0",
+		"@tokilabs/pug3-cli": "^3.0.1",
+		"stylus": "^0.64.0",
+		"typescript": "^5.8.3"
 	}
 }

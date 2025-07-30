@@ -90,7 +90,7 @@ backgroundRemote.getCommandKeys().then(async sections => {
 			stopRecording()
 			if (existing) return
 			tr.classList.add('recording')
-			recordPort = browser.runtime.connect(undefined, { name: 'recordGesture' })
+			recordPort = browser.runtime.connect({ name: 'recordGesture' })
 			recordPort.onMessage.addListener(({ code }: any) => {
 				if (!code) return
 				gestureInput.value = code

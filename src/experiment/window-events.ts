@@ -1,9 +1,9 @@
 var { ExtensionCommon: {
 	EventManager,
-} } = ChromeUtils.import('resource://gre/modules/ExtensionCommon.jsm')
+} } = ChromeUtils.importESModule('resource://gre/modules/ExtensionCommon.sys.mjs')
 var { ExtensionParent: {
 	apiManager: { global: { windowTracker } }
-} } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm")
+} } = ChromeUtils.importESModule("resource://gre/modules/ExtensionParent.sys.mjs")
 
 type MouseEventDetails = browser.windowEvents.MouseEventDetails
 type WheelEventDetails = browser.windowEvents.WheelEventDetails

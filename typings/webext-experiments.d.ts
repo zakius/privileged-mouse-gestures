@@ -136,6 +136,7 @@ declare global {
 		}
 		manager: any
 		interfaces: any
+		classes: any
 	}
 
 	class ExtensionAPI {
@@ -170,17 +171,18 @@ declare global {
 	}
 
 	const ChromeUtils: {
-		import(url: 'resource://gre/modules/ExtensionCommon.jsm'): {
+		importESModule(url: 'resource://gre/modules/ExtensionCommon.sys.mjs'): {
 			ExtensionCommon: { EventManager: typeof EventManager }
 		}
-		import(url: 'resource://gre/modules/ExtensionParent.jsm'): {
+		importESModule(url: 'resource://gre/modules/ExtensionParent.sys.mjs'): {
 			ExtensionParent: {
 				apiManager: { global: { windowTracker: WindowTracker } }
 			}
 		}
-		import(url: 'resource://gre/modules/ExtensionUtils.jsm'): {
+		importESModule(url: 'resource://gre/modules/ExtensionUtils.sys.mjs'): {
 			ExtensionUtils: { ExtensionError: typeof Error }
 		}
+		importESModule(url: string): any
 		import(url: string): any
 
 		registerWindowActor(name: string, options: {
@@ -188,9 +190,10 @@ declare global {
 			includeChrome?: boolean
 			matches?: string[]
 			remoteTypes?: string[]
-			parent?: { moduleURI: string }
+			parent?: { moduleURI?: string, esModuleURI?: string }
 			child?: {
-				moduleURI: string
+				moduleURI?: string
+				esModuleURI?: string
 				events?: Record<string, AddEventListenerOptions>
 				observers?: string[]
 			}

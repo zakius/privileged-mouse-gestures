@@ -27,11 +27,11 @@ const BUILDERS = {
 }
 const EXTRA_BUILD = [
 	`tsc ${LANG_ARG}`,
-	`pug -P -s -o ${DIST} ${SRC}`,
+	`pug3 -P -s -o ${DIST} ${SRC}`,
 ]
 const EXTRA_WATCH = [
 	`tsc -w ${LANG_ARG}`,
-	`pug -w -P -s -o ${DIST} ${SRC}`,
+	`pug3 -w -P -s -o ${DIST} ${SRC}`,
 ]
 
 const DEFAULT_MESSAGES = '_locales/en/messages.cson'
