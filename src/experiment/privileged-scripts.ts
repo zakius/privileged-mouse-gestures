@@ -115,7 +115,8 @@ class privilegedScripts extends ExtensionAPI {
 			},
 			child: {
 				esModuleURI: `chrome://${this.actorName}/content/v0/privileged-scripts-child.js?rand=${rand}`,
-			}
+			},
+			safeForUntrustedWebProcess: true,
 		})
 		privilegedScripts.refCount++
 	}

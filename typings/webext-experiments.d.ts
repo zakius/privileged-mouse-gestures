@@ -196,7 +196,8 @@ declare global {
 				esModuleURI?: string
 				events?: Record<string, AddEventListenerOptions>
 				observers?: string[]
-			}
+			},
+			safeForUntrustedWebProcess: boolean,
 		}): void
 		unregisterWindowActor(name: string): void
 
