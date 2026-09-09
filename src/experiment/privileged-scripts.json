@@ -1,0 +1,15 @@
+[
+  {
+    "namespace": "privilegedScripts",
+    "functions": [
+      {
+        "name": "executeScript",
+        "type": "function",
+        "async": true,
+        "allowAmbiguousOptionalArguments": true,
+        "parameters": []
+      }
+    ],
+    "events": []
+  }
+]

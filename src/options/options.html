@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <link rel="icon" href="/icons/icon.svg">
+    <link rel="stylesheet" href="options.css">
+  </head>
+  <body data-subtitle="options">
+    <script type="module" src="/common/base.js"></script>
+    <x-tabs>
+      <x-tabs-nav tabindex="0">
+        <x-tab class="icon-text" active>
+          <svg class="icon">
+            <use href="../icons/photon-icons.svg#preferences"></use>
+          </svg><span data-i18n="general"></span>
+        </x-tab>
+        <x-tab class="icon-text">
+          <svg class="icon">
+            <use href="../icons/extra-icons.svg#mouse-gestures"></use>
+          </svg><span data-i18n="mapping"></span>
+        </x-tab>
+      </x-tabs-nav>
+      <x-tabs-main same-size>
+        <x-page active>
+          <label class="input-label"><span data-i18n="mouseGestureButton"></span>
+            <select data-key="mouseGestureButton">
+              <option value="left" data-i18n="left"></option>
+              <option value="middle" data-i18n="middle"></option>
+              <option value="right" data-i18n="right"></option>
+            </select>
+          </label>
+          <hr>
+          <label class="input-label">
+            <input type="checkbox" data-key="displayTrace"><span data-i18n="displayTrace"></span>
+          </label>
+          <div>
+            <label class="input-label"><span data-i18n="traceColor"></span>
+              <input type="color" data-key="traceColor">
+            </label><span class="additional-number-container">
+              <input data-key="traceColorAlpha" type="number" min="0" max="100"><span>%</span></span>
+          </div>
+          <label class="input-label"><span data-i18n="traceWidth"></span>
+            <input type="number" step="any" min="1" data-key="traceWidth">
+          </label>
+          <hr>
+          <label class="input-label">
+            <input type="checkbox" data-key="displayStatus"><span data-i18n="displayStatus"></span>
+          </label>
+          <label class="input-label"><span data-i18n="statusFont"></span>
+            <input class="font-input" data-key="statusFont">
+          </label>
+          <div>
+            <label class="input-label"><span data-i18n="statusTextColor"></span>
+              <input type="color" data-key="statusTextColor">
+            </label><span class="additional-number-container">
+              <input data-key="statusTextColorAlpha" type="number" min="0" max="100"><span>%</span></span>
+          </div>
+          <div>
+            <label class="input-label"><span data-i18n="statusBackgroundColor"></span>
+              <input type="color" data-key="statusBackgroundColor">
+            </label><span class="additional-number-container">
+              <input data-key="statusBackgroundColorAlpha" type="number" min="0" max="100"><span>%</span></span>
+          </div>
+          <div>
+            <label class="input-label"><span data-i18n="statusBorderColor"></span>
+              <input type="color" data-key="statusBorderColor">
+            </label><span class="additional-number-container">
+              <input data-key="statusBorderColorAlpha" type="number" min="0" max="100"><span>%</span></span>
+          </div>
+          <div class="additional-number-container"><span data-i18n="statusPosition"></span><span class="additional-number-prefix">X=</span>
+            <input data-key="statusPositionX" type="number" min="0" max="100"><span>%</span><span class="additional-number-prefix">Y=</span>
+            <input data-key="statusPositionY" type="number" min="0" max="100"><span>%</span>
+          </div>
+          <hr>
+          <div>
+            <label class="input-label"><span data-i18n="gestureDirections"></span>
+              <select data-key="gestureDirections">
+                <option value="RDLU" data-i18n="directions90deg"></option>
+                <option value="RRdDLdLLuURu" data-i18n="directions45deg"></option>
+              </select>
+            </label><span class="gesture-code-example" id="gesture-directions-code-example"></span>
+          </div>
+          <div>
+            <label class="input-label">
+              <input type="checkbox" data-key="wheelGestures"><span data-i18n="wheelGestures"></span>
+            </label><span class="gesture-code-example">WheelR WheelD WheelL WheelU</span>
+          </div>
+          <div>
+            <label class="input-label">
+              <input type="checkbox" data-key="rockerGestures"><span data-i18n="rockerGestures"></span>
+            </label><span class="gesture-code-example">RockerR RockerL</span>
+          </div>
+          <hr><a target="_blank" href="/lib/LICENSE-3RD-PARTY.txt" data-i18n="license3rdParty"></a>
+        </x-page>
+        <x-page>
+          <table id="mapping-table">
+            <thead>
+              <tr>
+                <th data-i18n="command"></th>
+                <th data-i18n="gesture"></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <div>
+            <button class="icon-text" id="add-mapping-row">
+              <svg class="icon">
+                <use href="../icons/photon-icons.svg#new"></use>
+              </svg><span data-i18n="add"></span>
+            </button>
+          </div>
+        </x-page>
+      </x-tabs-main>
+    </x-tabs>
+    <template id="mapping-row-template">
+      <tr class="mapping-row">
+        <td>
+          <select class="command-select"></select>
+        </td>
+        <td>
+          <input class="gesture-input" required>
+        </td>
+        <td>
+          <button class="record icon-button" data-i18n-title="record">
+            <svg class="icon">
+              <use href="../icons/extra-icons.svg#record"></use>
+            </svg>
+          </button>
+          <button class="remove icon-button" data-i18n-title="remove">
+            <svg class="icon">
+              <use href="../icons/photon-icons.svg#stop"></use>
+            </svg>
+          </button>
+        </td>
+      </tr>
+    </template>
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

@@ -11,30 +11,12 @@ const LANG = (process.env.LANG || '').replace(/\..*/, '')
 	.replace(/[^-0-9a-zA-Z_]/g, '')
 const LANG_ARG = LANG ? ` --locale ${LANG} ` : ''
 
-const CSON_BIN_FIX = process.platform === 'win32' ? 'cson2json/../' : ''
+// .ts is compiled by tsc; everything else is copied verbatim.
+const BUILDERS = { ts: {} }
+const EXTRA_BUILD = [`tsc ${LANG_ARG}`]
+const EXTRA_WATCH = [`tsc -w ${LANG_ARG}`]
 
-const BUILDERS = {
-	ts: {},
-	pug: {},
-	cson: {
-		to: 'json',
-		cmd: (s, d) => `cson2json ${CSON_BIN_FIX}${s} > ${d}`,
-	},
-	styl: {
-		to: 'css',
-		cmd: (s, d) => `stylus < ${s} > ${d}`
-	}
-}
-const EXTRA_BUILD = [
-	`tsc ${LANG_ARG}`,
-	`pug3 -P -s -o ${DIST} ${SRC}`,
-]
-const EXTRA_WATCH = [
-	`tsc -w ${LANG_ARG}`,
-	`pug3 -w -P -s -o ${DIST} ${SRC}`,
-]
-
-const DEFAULT_MESSAGES = '_locales/en/messages.cson'
+const DEFAULT_MESSAGES = '_locales/en/messages.json'
 
 async function mkdirs(d) {
 	try {
@@ -72,13 +54,10 @@ async function build(s) {
 async function buildMessages() {
 	const d = 'typings/generated/messages.d.ts'
 	await mkdirs(d)
-	let content = 'interface I18nMessages {\n'
-	for (const line of
-		(await fs.readFile(`${SRC}/${DEFAULT_MESSAGES}`, 'utf-8')).split(/\r|\n/)) {
-		const [matched, key] = line.match(/^(\w+):\s*(?:#|$)/) || []
-		if (matched) content += `\t${key}: string\n`
-	}
-	content += '}\n'
+	const messages = JSON.parse(
+		await fs.readFile(`${SRC}/${DEFAULT_MESSAGES}`, 'utf-8'))
+	const content = 'interface I18nMessages {\n' +
+		Object.keys(messages).map(k => `\t${k}: string\n`).join('') + '}\n'
 	await fs.writeFile(d, content, 'utf-8')
 }
 
