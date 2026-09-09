@@ -12,7 +12,8 @@ export function defineBooleanAttribute(T: { prototype: HTMLElement }, attr: stri
 	Object.defineProperty(T.prototype, attr, {
 		get(this: HTMLElement) { return this.hasAttribute(attr) },
 		set(this: HTMLElement, value: boolean) {
-			value ? this.setAttribute(attr, '') : this.removeAttribute(attr)
+			if (value) this.setAttribute(attr, '')
+			else this.removeAttribute(attr)
 		},
 	})
 }

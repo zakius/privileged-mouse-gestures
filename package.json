@@ -1,9 +1,20 @@
 {
 	"private": true,
 	"dependencies": {
-		"@types/firefox-webext-browser": "^120.0.4"
+		"@types/firefox-webext-browser": "^143.0.0"
 	},
 	"devDependencies": {
-		"typescript": "^5.8.3"
+		"oxfmt": "^0.67.0",
+		"oxlint": "^1.82.0",
+		"oxlint-tsgolint": "^7.0.2001",
+		"typescript": "^7.0.2"
+	},
+	"scripts": {
+		"build": "node build",
+		"watch": "node build --watch",
+		"xpi": "node build --xpi",
+		"lint": "oxlint --type-aware",
+		"fmt": "oxfmt .",
+		"check": "tsc --noEmit && oxlint --type-aware && oxfmt --check ."
 	}
 }

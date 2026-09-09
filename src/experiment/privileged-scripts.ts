@@ -77,7 +77,7 @@ class privilegedScripts extends ExtensionAPI {
 		stream.close()
 	}
 
-	private static init(context: BaseContext) {
+	private static init(_context: BaseContext) {
 		let Services: any
 		try {
 			Services = ChromeUtils.import("resource://gre/modules/Services.jsm").Services
@@ -167,4 +167,5 @@ class privilegedScripts extends ExtensionAPI {
 }
 Object.assign(globalThis, { privilegedScripts })
 type privilegedScriptsAPI = ReturnType<typeof privilegedScripts.prototype.getAPIImpl>
+// oxlint-disable-next-line no-unused-vars -- ambient API declaration
 declare namespace browser { const privilegedScripts: privilegedScriptsAPI }

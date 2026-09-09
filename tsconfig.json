@@ -1,9 +1,13 @@
 {
 	"compilerOptions": {
 		"outDir": "dist",
+		"rootDir": "src",
 		"target": "es2019",
 		"module": "esNext",
-		"moduleResolution": "node",
+		"moduleResolution": "bundler",
+		"types": [
+			"firefox-webext-browser"
+		],
 		"strict": true,
 		"noImplicitReturns": true,
 		"pretty": true,

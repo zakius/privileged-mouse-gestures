@@ -1,0 +1,13 @@
+{
+	"$schema": "./node_modules/oxfmt/configuration_schema.json",
+	"useTabs": true,
+	"semi": false,
+	"singleQuote": true,
+	"printWidth": 80,
+	"ignorePatterns": [
+		"package-lock.json",
+		"**/*.html",
+		"**/*.css",
+		"**/*.json"
+	]
+}
