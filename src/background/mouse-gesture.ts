@@ -1,5 +1,5 @@
-import { localSettings, S } from "./settings.js";
-import { importTemplateElement } from "../util/dom.js";
+import { localSettings, S } from './settings.js'
+import { importTemplateElement } from '../util/dom.js'
 
 type MouseEventDetails = browser.windowEvents.MouseEventDetails
 type WheelEventDetails = browser.windowEvents.WheelEventDetails
@@ -13,13 +13,13 @@ class DirectionList {
 	private readonly b: number
 
 	constructor(private readonly items: ReadonlyArray<string>) {
-		this.k = 2 * Math.PI / items.length
+		this.k = (2 * Math.PI) / items.length
 		this.b = -this.k / 2 - 2 * Math.PI // a - b > 0
 	}
 
 	get(v0: MouseEventDetails, v1: MouseEventDetails) {
 		const a = Math.atan2(v1.y - v0.y, v1.x - v0.x)
-		const i = (a - this.b) / this.k | 0
+		const i = ((a - this.b) / this.k) | 0
 		return this.items[i % this.items.length]
 	}
 }
@@ -33,34 +33,44 @@ export class MouseGestureListener {
 	private lastDetails?: MouseEventDetails // undefined if normal gestures are stopped
 	private currentCode = ''
 
-	private static readonly canvasContextLayers =
-		['traceCanvasContext', 'statusCanvasContext'] as const
+	private static readonly canvasContextLayers = [
+		'traceCanvasContext',
+		'statusCanvasContext',
+	] as const
 	private traceCanvasContext?: CanvasRenderingContext2D
 	private statusCanvasContext?: CanvasRenderingContext2D
 	private compositionCanvasContext?: CanvasRenderingContext2D
-	private readonly compositionAlphaMap = new WeakMap<CanvasRenderingContext2D, number>()
+	private readonly compositionAlphaMap = new WeakMap<
+		CanvasRenderingContext2D,
+		number
+	>()
 	private statusLastRect: [number, number, number, number] = [0, 0, 0, 0]
 	private canvasScaling = 1
 
-	get hasCommitted() { return this.lastDetails !== this.downDetails }
+	get hasCommitted() {
+		return this.lastDetails !== this.downDetails
+	}
 
 	constructor() {
 		browser.windowEvents.onMouseDown.addListener(this.onMouseDown)
 		browser.windowEvents.onMouseUp.addListener(this.onMouseUp)
-		localSettings.listen('mouseGestureButton', value => {
+		localSettings.listen('mouseGestureButton', (value) => {
 			this.mouseGestureButton = {
-				left: 0, middle: 1, right: 2, '': NaN,
+				left: 0,
+				middle: 1,
+				right: 2,
+				'': NaN,
 			}[value || '']
 			if (value === 'right')
-				browser.browserSettings.contextMenuShowEvent.set({ value: "mouseup" })
-			else
-				browser.browserSettings.contextMenuShowEvent.clear({})
+				browser.browserSettings.contextMenuShowEvent.set({ value: 'mouseup' })
+			else browser.browserSettings.contextMenuShowEvent.clear({})
 		})
-		localSettings.listen('gestureDirections', value => {
+		localSettings.listen('gestureDirections', (value) => {
 			this.directionList = new DirectionList(
-				value ? value.split(/(?=[A-Z])/) : [''])
+				value ? value.split(/(?=[A-Z])/) : [''],
+			)
 		})
-		localSettings.listen('rockerGestures', value => {
+		localSettings.listen('rockerGestures', (value) => {
 			if (value)
 				browser.windowEvents.onMouseDown.addListener(this.onRockerMouseDown)
 			else
@@ -68,14 +78,17 @@ export class MouseGestureListener {
 		})
 	}
 
-	private readonly statusMeasurer = new class {
-		readonly container = document.body.appendChild(importTemplateElement(
-			'text-measurer-template')) as HTMLElement
+	private readonly statusMeasurer = new (class {
+		readonly container = document.body.appendChild(
+			importTemplateElement('text-measurer-template'),
+		) as HTMLElement
 		readonly text = this.container.querySelector(
-			'.text-measurer-text') as HTMLElement
+			'.text-measurer-text',
+		) as HTMLElement
 		readonly baseline = this.container.querySelector(
-			'.text-measurer-baseline') as HTMLElement
-	}
+			'.text-measurer-baseline',
+		) as HTMLElement
+	})()
 
 	private readonly onMouseDown = (details: MouseEventDetails) => {
 		if (this.downDetails && details.button !== this.downDetails.button) {
@@ -86,12 +99,15 @@ export class MouseGestureListener {
 		if (details.buttons !== buttonToButtons[details.button]) return
 		this.downDetails = this.lastDetails = details
 		this.currentCode = ''
-		browser.windowEvents.onMouseMove.addListener(this.onMouseMove,
-			{ windowId: details.windowId })
+		browser.windowEvents.onMouseMove.addListener(this.onMouseMove, {
+			windowId: details.windowId,
+		})
 
 		if (S.wheelGestures)
-			browser.windowEvents.onWheel.addListener(this.onWheel,
-				{ blockButtons: 0, windowId: details.windowId })
+			browser.windowEvents.onWheel.addListener(this.onWheel, {
+				blockButtons: 0,
+				windowId: details.windowId,
+			})
 	}
 
 	private readonly onMouseMove = (details: MouseEventDetails) => {
@@ -121,8 +137,10 @@ export class MouseGestureListener {
 			if (S.displayTrace) {
 				this.traceCanvasContext = createCanvasContext(this.canvasScaling)
 				this.traceCanvasContext.strokeStyle = S.traceColor
-				this.compositionAlphaMap.set(this.traceCanvasContext,
-					S.traceColorAlpha / 100)
+				this.compositionAlphaMap.set(
+					this.traceCanvasContext,
+					S.traceColorAlpha / 100,
+				)
 				this.traceCanvasContext.lineWidth = S.traceWidth
 				this.traceCanvasContext.lineCap = 'round'
 			}
@@ -133,7 +151,7 @@ export class MouseGestureListener {
 				this.statusMeasurer.text.style.font = S.statusFont
 				this.statusLastRect = [0, 0, 0, 0]
 			}
-			if (MouseGestureListener.canvasContextLayers.some(k => this[k]))
+			if (MouseGestureListener.canvasContextLayers.some((k) => this[k]))
 				this.compositionCanvasContext = createCanvasContext(1)
 		}
 
@@ -149,9 +167,12 @@ export class MouseGestureListener {
 			this.traceCanvasContext.stroke()
 			const x = Math.min(this.lastDetails.x, details.x) - S.traceWidth
 			const y = Math.min(this.lastDetails.y, details.y) - S.traceWidth
-			dirtyRects.push([x, y,
+			dirtyRects.push([
+				x,
+				y,
 				Math.abs(this.lastDetails.x - details.x) + 2 * S.traceWidth,
-				Math.abs(this.lastDetails.y - details.y) + 2 * S.traceWidth])
+				Math.abs(this.lastDetails.y - details.y) + 2 * S.traceWidth,
+			])
 		}
 		if (this.statusCanvasContext && lastCurrentCode !== this.currentCode) {
 			this.statusCanvasContext.clearRect(...this.statusLastRect)
@@ -162,25 +183,33 @@ export class MouseGestureListener {
 			this.statusMeasurer.text.textContent = status
 			const w = this.statusMeasurer.container.offsetWidth
 			const h = this.statusMeasurer.container.offsetHeight
-			const x = (this.statusCanvasContext.canvas.width / this.canvasScaling - w) *
+			const x =
+				(this.statusCanvasContext.canvas.width / this.canvasScaling - w) *
 				(S.statusPositionX / 100)
-			const y = (this.statusCanvasContext.canvas.height / this.canvasScaling - h) *
+			const y =
+				(this.statusCanvasContext.canvas.height / this.canvasScaling - h) *
 				(S.statusPositionY / 100)
 
 			let delta = 1
 			this.statusCanvasContext.fillStyle = S.statusBorderColor
 			this.statusCanvasContext.globalAlpha = S.statusBorderColorAlpha / 100
-			this.statusCanvasContext.fillRect(x - delta, y - delta,
-				w + delta * 2, h + delta * 2)
+			this.statusCanvasContext.fillRect(
+				x - delta,
+				y - delta,
+				w + delta * 2,
+				h + delta * 2,
+			)
 			this.statusCanvasContext.fillStyle = S.statusBackgroundColor
 			this.statusCanvasContext.globalAlpha = S.statusBackgroundColorAlpha / 100
 			this.statusCanvasContext.clearRect(x, y, w, h)
 			this.statusCanvasContext.fillRect(x, y, w, h)
 			this.statusCanvasContext.fillStyle = S.statusTextColor
 			this.statusCanvasContext.globalAlpha = S.statusTextColorAlpha / 100
-			this.statusCanvasContext.fillText(status,
+			this.statusCanvasContext.fillText(
+				status,
 				x + this.statusMeasurer.text.offsetLeft,
-				y + this.statusMeasurer.baseline.offsetTop)
+				y + this.statusMeasurer.baseline.offsetTop,
+			)
 			delta += 1 // anti-aliasing border
 			this.statusLastRect = [x - delta, y - delta, w + delta * 2, h + delta * 2]
 			dirtyRects.push(this.statusLastRect)
@@ -188,7 +217,8 @@ export class MouseGestureListener {
 
 		for (const rect of dirtyRects) {
 			const [lx, ly, lw, lh] = rect
-			const x = lx * this.canvasScaling | 0, y = ly * this.canvasScaling | 0
+			const x = (lx * this.canvasScaling) | 0,
+				y = (ly * this.canvasScaling) | 0
 			const w = Math.ceil((lx + lw) * this.canvasScaling) - x
 			const h = Math.ceil((ly + lh) * this.canvasScaling) - y
 			if (w <= 0 || h <= 0) continue
@@ -197,12 +227,23 @@ export class MouseGestureListener {
 				if (!this[ctx]) continue
 				this.compositionCanvasContext!.globalAlpha =
 					this.compositionAlphaMap.get(this[ctx]!) || 1
-				this.compositionCanvasContext!.drawImage(this[ctx]!.canvas,
-					x, y, w, h, x, y, w, h)
+				this.compositionCanvasContext!.drawImage(
+					this[ctx]!.canvas,
+					x,
+					y,
+					w,
+					h,
+					x,
+					y,
+					w,
+					h,
+				)
 			}
-			browser.windowOverlay.setWindowOverlay(details.windowId,
+			browser.windowOverlay.setWindowOverlay(
+				details.windowId,
 				this.compositionCanvasContext!.getImageData(x, y, w, h),
-				{ x, y, disableScaling: true })
+				{ x, y, disableScaling: true },
+			)
 		}
 
 		this.lastDetails = details
@@ -214,7 +255,9 @@ export class MouseGestureListener {
 		if (this.hasCommitted) {
 			try {
 				this.onGesture(this.currentCode, details.windowId)
-			} catch (error) { console.error(error) }
+			} catch (error) {
+				console.error(error)
+			}
 		}
 		this.reset()
 	}
@@ -226,8 +269,16 @@ export class MouseGestureListener {
 
 	private readonly onWheel = ({ deltaX, deltaY }: WheelEventDetails) => {
 		if (!this.downDetails) return
-		const direction = !deltaX && deltaY ? (deltaY > 0 ? 'D' : 'U') :
-			!deltaY && deltaX ? (deltaX > 0 ? 'R' : 'L') : undefined
+		const direction =
+			!deltaX && deltaY
+				? deltaY > 0
+					? 'D'
+					: 'U'
+				: !deltaY && deltaX
+					? deltaX > 0
+						? 'R'
+						: 'L'
+					: undefined
 		if (!direction) return
 		this.stopNormalGestures()
 		this.blockContextMenu()
@@ -235,13 +286,19 @@ export class MouseGestureListener {
 	}
 
 	private readonly onRockerMouseDown = (details: MouseEventDetails) => {
-		const direction = details.button === 0 && (details.buttons & 2) ? 'L' :
-			details.button === 2 && (details.buttons & 1) ? 'R' : undefined
+		const direction =
+			details.button === 0 && details.buttons & 2
+				? 'L'
+				: details.button === 2 && details.buttons & 1
+					? 'R'
+					: undefined
 		if (!direction) return
 		this.onGesture('Rocker' + direction, details.windowId)
 		for (const event of ['onMouseUp', 'onContextMenu'] as const)
-			browser.windowEvents[event].addListener(this.onRockerBlockMenu,
-				{ windowId: details.windowId, blockButtons: 0 })
+			browser.windowEvents[event].addListener(this.onRockerBlockMenu, {
+				windowId: details.windowId,
+				blockButtons: 0,
+			})
 	}
 
 	private readonly onRockerBlockMenu = (details: MouseEventDetails) => {
@@ -253,7 +310,8 @@ export class MouseGestureListener {
 	private blockContextMenu() {
 		if (!this.downDetails) return
 		browser.windowEvents.onContextMenu.addListener(this.onContextMenu, {
-			windowId: this.downDetails.windowId, blockButtons: this.downDetails.button
+			windowId: this.downDetails.windowId,
+			blockButtons: this.downDetails.button,
 		})
 	}
 
@@ -267,11 +325,12 @@ export class MouseGestureListener {
 		for (const key of [
 			...MouseGestureListener.canvasContextLayers,
 			'compositionCanvasContext',
-		] as const) if (this[key]) {
-			this[key]!.canvas.width = 1
-			this[key]!.canvas.height = 1
-			this[key] = undefined
-		}
+		] as const)
+			if (this[key]) {
+				this[key]!.canvas.width = 1
+				this[key]!.canvas.height = 1
+				this[key] = undefined
+			}
 	}
 
 	private reset() {
@@ -281,6 +340,6 @@ export class MouseGestureListener {
 		browser.windowEvents.onWheel.removeListener(this.onWheel)
 	}
 
-	onGesture: (gesture: string, windowId: number) => void = () => { }
+	onGesture: (gesture: string, windowId: number) => void = () => {}
 	onGetStatus: (gesture: string) => string = () => ''
 }

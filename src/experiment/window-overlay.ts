@@ -1,16 +1,22 @@
 class windowOverlay extends ExtensionAPI {
-	private readonly overlayMap = new Map<string, {
-		canvas: HTMLCanvasElement, onClose: { close: () => void }
-	}>()
+	private readonly overlayMap = new Map<
+		string,
+		{
+			canvas: HTMLCanvasElement
+			onClose: { close: () => void }
+		}
+	>()
 
 	private overlayKey(extension: Extension, windowId: number) {
 		return `${extension.uuid}@${windowId}`
 	}
 
 	getAPIImpl = (that: this, context: BaseContext) => ({
-		async setWindowOverlay(windowId: number, imageData: ImageData | null, {
-			x = 0, y = 0, disableScaling = false
-		} = {}) {
+		async setWindowOverlay(
+			windowId: number,
+			imageData: ImageData | null,
+			{ x = 0, y = 0, disableScaling = false } = {},
+		) {
 			const { extension } = context
 			const { windowManager } = extension
 			const wnd = windowManager.get(windowId, context).window
@@ -26,7 +32,9 @@ class windowOverlay extends ExtensionAPI {
 			const parent = wnd.document.documentElement
 			if (!canvasData) {
 				const canvas = wnd.document.createElementNS(
-					"http://www.w3.org/1999/xhtml", 'canvas') as HTMLCanvasElement
+					'http://www.w3.org/1999/xhtml',
+					'canvas',
+				) as HTMLCanvasElement
 				canvas.style.position = 'fixed'
 				canvas.style.top = canvas.style.left = '0'
 				canvas.style.width = '100%'
@@ -42,15 +50,15 @@ class windowOverlay extends ExtensionAPI {
 						canvas.remove()
 						that.overlayMap.delete(key)
 						extension.forgetOnClose(onClose)
-					}
+					},
 				}
 				that.overlayMap.set(key, (canvasData = { canvas, onClose }))
 				extension.callOnClose(onClose)
 			}
 
 			const factor = disableScaling ? wnd.devicePixelRatio : 1
-			const canvasWidth = parent.clientWidth * factor | 0
-			const canvasHeight = parent.clientHeight * factor | 0
+			const canvasWidth = (parent.clientWidth * factor) | 0
+			const canvasHeight = (parent.clientHeight * factor) | 0
 			const { canvas } = canvasData
 			if (canvas.width !== canvasWidth || canvas.height !== canvasHeight) {
 				canvas.width = canvasWidth
@@ -60,12 +68,12 @@ class windowOverlay extends ExtensionAPI {
 		},
 
 		async getWindowSize(windowId: number) {
-			const wnd = context.extension.windowManager
-				.get(windowId, context).window
+			const wnd = context.extension.windowManager.get(windowId, context).window
 			const parent = wnd.document.documentElement
 			const { devicePixelRatio } = wnd
 			return {
-				width: parent.clientWidth, height: parent.clientHeight,
+				width: parent.clientWidth,
+				height: parent.clientHeight,
 				devicePixelRatio,
 			}
 		},
@@ -78,4 +86,6 @@ class windowOverlay extends ExtensionAPI {
 Object.assign(globalThis, { windowOverlay })
 type windowOverlayAPI = ReturnType<typeof windowOverlay.prototype.getAPIImpl>
 // oxlint-disable-next-line no-unused-vars -- ambient API declaration
-declare namespace browser { const windowOverlay: windowOverlayAPI }
+declare namespace browser {
+	const windowOverlay: windowOverlayAPI
+}

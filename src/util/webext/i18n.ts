@@ -1,7 +1,11 @@
-declare global { interface I18nMessages { } }
+declare global {
+	interface I18nMessages {}
+}
 
 export function applyI18n(node: ParentNode = document) {
-	for (const v of node.querySelectorAll('[data-i18n]') as NodeListOf<HTMLElement>)
+	for (const v of node.querySelectorAll(
+		'[data-i18n]',
+	) as NodeListOf<HTMLElement>)
 		v.innerText = browser.i18n.getMessage(v.dataset['i18n']!)
 }
 
@@ -13,7 +17,7 @@ export function applyI18nAttr(attr: string, node: ParentNode = document) {
 
 export const M: I18nMessages & {
 	(key: keyof I18nMessages, ...subs: (string | number)[]): string
-} = new Proxy((() => { }) as any, {
+} = new Proxy((() => {}) as any, {
 	get(_target, key: string) {
 		return browser.i18n.getMessage(key)
 	},

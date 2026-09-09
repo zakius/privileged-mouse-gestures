@@ -1,5 +1,5 @@
 const { promises: fs, watch } = require('fs')
-const path = require("path")
+const path = require('path')
 const child_process = require('child_process')
 
 require('events').defaultMaxListeners = 100
@@ -7,7 +7,8 @@ require('events').defaultMaxListeners = 100
 const SRC = 'src'
 const DIST = 'dist'
 
-const LANG = (process.env.LANG || '').replace(/\..*/, '')
+const LANG = (process.env.LANG || '')
+	.replace(/\..*/, '')
 	.replace(/[^-0-9a-zA-Z_]/g, '')
 const LANG_ARG = LANG ? ` --locale ${LANG} ` : ''
 
@@ -55,24 +56,37 @@ async function buildMessages() {
 	const d = 'typings/generated/messages.d.ts'
 	await mkdirs(d)
 	const messages = JSON.parse(
-		await fs.readFile(`${SRC}/${DEFAULT_MESSAGES}`, 'utf-8'))
-	const content = 'interface I18nMessages {\n' +
-		Object.keys(messages).map(k => `\t${k}: string\n`).join('') + '}\n'
+		await fs.readFile(`${SRC}/${DEFAULT_MESSAGES}`, 'utf-8'),
+	)
+	const content =
+		'interface I18nMessages {\n' +
+		Object.keys(messages)
+			.map((k) => `\t${k}: string\n`)
+			.join('') +
+		'}\n'
 	await fs.writeFile(d, content, 'utf-8')
 }
 
 async function listFiles(root) {
-	return !(await fs.stat(root)).isDirectory() ? [root] :
-		[].concat(...await Promise.all((await fs.readdir(root)).map(
-			item => listFiles(path.posix.join(root, item)))))
+	return !(await fs.stat(root)).isDirectory()
+		? [root]
+		: [].concat(
+				...(await Promise.all(
+					(await fs.readdir(root)).map((item) =>
+						listFiles(path.posix.join(root, item)),
+					),
+				)),
+			)
 }
 
 process.chdir(__dirname)
-process.env.PATH = './node_modules/.bin' +
-	(process.platform === 'win32' ? ';' : ':') + process.env.PATH
+process.env.PATH =
+	'./node_modules/.bin' +
+	(process.platform === 'win32' ? ';' : ':') +
+	process.env.PATH
 const argv = process.argv.slice(2)
 
-listFiles(SRC).then(async files => {
+listFiles(SRC).then(async (files) => {
 	if (argv.includes('--watch')) {
 		let messagesPromise = buildMessages()
 		const builds = {}
@@ -90,9 +104,11 @@ listFiles(SRC).then(async files => {
 		await Promise.all([...files.map(build), ...EXTRA_BUILD.map(call)])
 		if (argv.includes('--xpi')) {
 			process.chdir(DIST)
-			await call(argv.includes('--7z') ?
-				`7z a "../${DIST}.unsigned.xpi"` :
-				`zip -r -FS "../${DIST}.unsigned.xpi" *`)
+			await call(
+				argv.includes('--7z')
+					? `7z a "../${DIST}.unsigned.xpi"`
+					: `zip -r -FS "../${DIST}.unsigned.xpi" *`,
+			)
 		}
 	}
 })

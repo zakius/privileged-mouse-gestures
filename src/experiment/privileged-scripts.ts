@@ -1,29 +1,36 @@
 if (typeof JSWindowActorChild == 'undefined')
-	(globalThis as any).JSWindowActorChild = class { }
+	(globalThis as any).JSWindowActorChild = class {}
 if (typeof JSWindowActorParent == 'undefined')
-	(globalThis as any).JSWindowActorParent = class { }
+	(globalThis as any).JSWindowActorParent = class {}
 
-class PrivilegedScripts_privileged_mouse_gestures_qw_thucfb_comChild
-	extends JSWindowActorChild {
+class PrivilegedScripts_privileged_mouse_gestures_qw_thucfb_comChild extends JSWindowActorChild {
 	private readonly sandboxMap = new Map<string, any>()
-	private readonly systemPrincipal: 'nsIPrincipal' =
-		(Components as any).classes["@mozilla.org/systemprincipal;1"]
-			.createInstance((Components as any).interfaces.nsIPrincipal)
+	private readonly systemPrincipal: 'nsIPrincipal' = (
+		Components as any
+	).classes['@mozilla.org/systemprincipal;1'].createInstance(
+		(Components as any).interfaces.nsIPrincipal,
+	)
 
 	constructor() {
 		super()
 		let Services: any
 		try {
-			Services = ChromeUtils.import("resource://gre/modules/Services.jsm").Services
-		} catch { Services = (globalThis as any).Services }
-		Services.cpmm.addMessageListener('Extension:Shutdown',
+			Services = ChromeUtils.import(
+				'resource://gre/modules/Services.jsm',
+			).Services
+		} catch {
+			Services = (globalThis as any).Services
+		}
+		Services.cpmm.addMessageListener(
+			'Extension:Shutdown',
 			(message: ReceiveMessageArgument) => {
 				const id = message.data.id
 				const sandbox = this.sandboxMap.get(id)
 				if (!sandbox) return
 				Components.utils.nukeSandbox(sandbox)
 				this.sandboxMap.delete(id)
-			})
+			},
+		)
 	}
 
 	async receiveMessage(message: ReceiveMessageArgument) {
@@ -49,8 +56,9 @@ class PrivilegedScripts_privileged_mouse_gestures_qw_thucfb_comChild
 				if (code != null) {
 					result = Components.utils.evalInSandbox(code, sandbox, 'true')
 				} else if (url != null) {
-					result = ChromeUtils.compileScript(url,
-						{ hasReturnValue: true }).executeInGlobal(sandbox)
+					result = ChromeUtils.compileScript(url, {
+						hasReturnValue: true,
+					}).executeInGlobal(sandbox)
 				}
 				return { result: await result }
 			} catch (error: any) {
@@ -61,17 +69,18 @@ class PrivilegedScripts_privileged_mouse_gestures_qw_thucfb_comChild
 	}
 }
 
-class PrivilegedScripts_privileged_mouse_gestures_qw_thucfb_comParent
-	extends JSWindowActorParent { }
+class PrivilegedScripts_privileged_mouse_gestures_qw_thucfb_comParent extends JSWindowActorParent {}
 
 class privilegedScripts extends ExtensionAPI {
-	private static actorName = 'PrivilegedScripts_privileged_mouse_gestures_qw_thucfb_com'
+	private static actorName =
+		'PrivilegedScripts_privileged_mouse_gestures_qw_thucfb_com'
 	private static refCount = 0
 
 	private static writeFileIfNotExist(file: any, content: string) {
 		if (file.exists()) return
-		const stream = Components.classes["@mozilla.org/network/file-output-stream;1"]
-			.createInstance(Components.interfaces.nsIFileOutputStream)
+		const stream = Components.classes[
+			'@mozilla.org/network/file-output-stream;1'
+		].createInstance(Components.interfaces.nsIFileOutputStream)
 		stream.init(file, 0x02 | 0x08 | 0x20, 0o644, 0)
 		stream.write(content, content.length)
 		stream.close()
@@ -80,11 +89,15 @@ class privilegedScripts extends ExtensionAPI {
 	private static init(_context: BaseContext) {
 		let Services: any
 		try {
-			Services = ChromeUtils.import("resource://gre/modules/Services.jsm").Services
-		} catch { Services = (globalThis as any).Services }
+			Services = ChromeUtils.import(
+				'resource://gre/modules/Services.jsm',
+			).Services
+		} catch {
+			Services = (globalThis as any).Services
+		}
 
 		const { interfaces: Ci } = Components
-		const dir = Services.dirsvc.get("UChrm", Ci.nsIFile)
+		const dir = Services.dirsvc.get('UChrm', Ci.nsIFile)
 		dir.append(this.actorName)
 		if (!dir.exists()) dir.create(Ci.nsIFile.DIRECTORY_TYPE, 0o755)
 		dir.append('v0')
@@ -93,18 +106,24 @@ class privilegedScripts extends ExtensionAPI {
 		let file = dir.clone()
 		file.append('chrome.manifest')
 		this.writeFileIfNotExist(file, `content ${this.actorName} ../\n`)
-		Components.manager.QueryInterface(Ci.nsIComponentRegistrar).autoRegister(file)
+		Components.manager
+			.QueryInterface(Ci.nsIComponentRegistrar)
+			.autoRegister(file)
 
 		file = dir.clone()
 		file.append('privileged-scripts-child.js')
-		this.writeFileIfNotExist(file,
+		this.writeFileIfNotExist(
+			file,
 			`${PrivilegedScripts_privileged_mouse_gestures_qw_thucfb_comChild}
-			export { ${PrivilegedScripts_privileged_mouse_gestures_qw_thucfb_comChild.name} }`)
+			export { ${PrivilegedScripts_privileged_mouse_gestures_qw_thucfb_comChild.name} }`,
+		)
 		file = dir.clone()
 		file.append('privileged-scripts-parent.js')
-		this.writeFileIfNotExist(file,
+		this.writeFileIfNotExist(
+			file,
 			`${PrivilegedScripts_privileged_mouse_gestures_qw_thucfb_comParent}
-			export { ${PrivilegedScripts_privileged_mouse_gestures_qw_thucfb_comParent.name} }`)
+			export { ${PrivilegedScripts_privileged_mouse_gestures_qw_thucfb_comParent.name} }`,
+		)
 
 		const rand = `${Date.now()}_${Math.random()}`
 		ChromeUtils.registerWindowActor(this.actorName, {
@@ -133,7 +152,8 @@ class privilegedScripts extends ExtensionAPI {
 		})(),
 
 		async executeScript({
-			tabId = -1, allFrames = false,
+			tabId = -1,
+			allFrames = false,
 			code = undefined as string | undefined,
 			file = undefined as string | undefined,
 		}) {
@@ -146,19 +166,21 @@ class privilegedScripts extends ExtensionAPI {
 				const global = bc.currentWindowGlobal
 				if (!global) return
 				const actor = global.getActor(privilegedScripts.actorName)
-				promises.push(actor.sendQuery("executeScript", {
-					extensionId: extension.id,
-					code,
-					url: file !== undefined ? extension.getURL(file) : undefined
-				}))
+				promises.push(
+					actor.sendQuery('executeScript', {
+						extensionId: extension.id,
+						code,
+						url: file !== undefined ? extension.getURL(file) : undefined,
+					}),
+				)
 				if (allFrames) [...bc.getChildren()].forEach(executeOnContext)
 			}
 			executeOnContext(rootBC)
-			return (await Promise.all(promises)).map(v => {
+			return (await Promise.all(promises)).map((v) => {
 				if (v && v.error) throw { message: v.error }
 				return v && v.result
 			})
-		}
+		},
 	})
 
 	getAPI(context: BaseContext) {
@@ -166,6 +188,10 @@ class privilegedScripts extends ExtensionAPI {
 	}
 }
 Object.assign(globalThis, { privilegedScripts })
-type privilegedScriptsAPI = ReturnType<typeof privilegedScripts.prototype.getAPIImpl>
+type privilegedScriptsAPI = ReturnType<
+	typeof privilegedScripts.prototype.getAPIImpl
+>
 // oxlint-disable-next-line no-unused-vars -- ambient API declaration
-declare namespace browser { const privilegedScripts: privilegedScriptsAPI }
+declare namespace browser {
+	const privilegedScripts: privilegedScriptsAPI
+}

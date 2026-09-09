@@ -1,12 +1,15 @@
-export { }
+export {}
 
 declare class EventManager<Ts extends any[], As extends any[] = []> {
 	constructor(params: {
-		context: BaseContext, name: string,
-		register: (fire: { async(...args: Ts): void }, ...args: As)
-			=> /*destroy*/ () => void
-		inputHandling?: boolean,
-		persistent?: { module: string, event: string }
+		context: BaseContext
+		name: string
+		register: (
+			fire: { async(...args: Ts): void },
+			...args: As
+		) => /*destroy*/ () => void
+		inputHandling?: boolean
+		persistent?: { module: string; event: string }
 	})
 
 	api(): {
@@ -23,20 +26,30 @@ interface WindowTracker {
 	getTopWindow(context: BaseContext): Window | null
 	getId(window: Window): number
 	getCurrentWindow(context: Window): Window | null
-	getWindow(id: number, context: BaseContext, strict?: boolean): Window | undefined
+	getWindow(
+		id: number,
+		context: BaseContext,
+		strict?: boolean,
+	): Window | undefined
 	addOpenListener(listener: (window: Window) => void): void
 	removeOpenListener(listener: (window: Window) => void): void
 	addCloseListener(listener: (window: Window) => void): void
 	removeCloseListener(listener: (window: Window) => void): void
 	addListener(type: string, listener: (window: Window) => void | object): void
-	removeListener(type: string, listener: (window: Window) => void | object): void
+	removeListener(
+		type: string,
+		listener: (window: Window) => void | object,
+	): void
 	addProgressListener(window: Window, listener: object): void
 	removeProgressListener(window: Window, listener: object): void
 }
 
-interface FallbackTabSize { width: number, height: number }
+interface FallbackTabSize {
+	width: number
+	height: number
+}
 
-interface NativeTab extends Element { }
+interface NativeTab extends Element {}
 
 interface BrowsingContext {
 	currentWindowGlobal: {
@@ -86,52 +99,86 @@ interface WindowBase {
 	getTabAtIndex(index: number): TabBase | undefined
 }
 
-type TabQueryInfo = Pick<Parameters<typeof browser.tabs.query>[0],
-	'active' | 'audible' | 'cookieStoreId' | 'discarded' | 'hidden' |
-	'highlighted' | 'index' | 'muted' | 'pinned'
-	| 'status' | 'title' | 'screen' | 'camera' | 'microphone'>
+type TabQueryInfo = Pick<
+	Parameters<typeof browser.tabs.query>[0],
+	| 'active'
+	| 'audible'
+	| 'cookieStoreId'
+	| 'discarded'
+	| 'hidden'
+	| 'highlighted'
+	| 'index'
+	| 'muted'
+	| 'pinned'
+	| 'status'
+	| 'title'
+	| 'screen'
+	| 'camera'
+	| 'microphone'
+>
 
-type WindowQueryInfo = Pick<Parameters<typeof browser.tabs.query>[0],
-	'currentWindow' | 'lastFocusedWindow' | 'windowId' | 'windowType'>
+type WindowQueryInfo = Pick<
+	Parameters<typeof browser.tabs.query>[0],
+	'currentWindow' | 'lastFocusedWindow' | 'windowId' | 'windowType'
+>
 
 interface TabManager {
 	readonly extension: Extension
 	hasTabPermission(nativeTab: NativeTab): boolean
 	getWrapper(nativeTab: NativeTab): TabBase
 	canAccessTab(nativeTab: NativeTab): boolean
-	convert(nativeTab: NativeTab, fallbackTabSize: FallbackTabSize): browser.tabs.Tab
-	query(queryInfo: TabQueryInfo | WindowQueryInfo,
-		context?: BaseContext): IterableIterator<TabBase>
+	convert(
+		nativeTab: NativeTab,
+		fallbackTabSize: FallbackTabSize,
+	): browser.tabs.Tab
+	query(
+		queryInfo: TabQueryInfo | WindowQueryInfo,
+		context?: BaseContext,
+	): IterableIterator<TabBase>
 	get(tabId: number): TabBase
 }
 
 interface WindowManager {
 	readonly extension: Extension
-	convert(window: Window, getInfo: browser.windows.GetInfo): browser.windows.Window
+	convert(
+		window: Window,
+		getInfo: browser.windows.GetInfo,
+	): browser.windows.Window
 	getWrapper(window: Window): WindowBase
-	query(queryInfo?: WindowQueryInfo, context?: BaseContext): IterableIterator<WindowBase>
+	query(
+		queryInfo?: WindowQueryInfo,
+		context?: BaseContext,
+	): IterableIterator<WindowBase>
 	get(windowId: number, context: BaseContext): WindowBase
 	getAll(context: BaseContext): Iterator<WindowBase>
 	canAccessWindow(window: Window, context?: BaseContext): boolean
 }
 
-interface Sandbox { }
+interface Sandbox {}
 
 declare global {
 	const Components: {
 		utils: {
-			Sandbox(principal: Window | string | null, options?: {
-				freshZone?: boolean
-				sameZoneAs?: object
-				sandboxName?: string
-				sandboxPrototype?: object
-				wantComponents?: boolean
-				wantExportHelpers?: boolean
-				wantGlobalProperties?: boolean
-				wantXrays?: boolean
-			}): Sandbox
-			evalInSandbox(source: string, sandbox: Sandbox,
-				version?: string, filename?: string, lineNo?: number): any
+			Sandbox(
+				principal: Window | string | null,
+				options?: {
+					freshZone?: boolean
+					sameZoneAs?: object
+					sandboxName?: string
+					sandboxPrototype?: object
+					wantComponents?: boolean
+					wantExportHelpers?: boolean
+					wantGlobalProperties?: boolean
+					wantXrays?: boolean
+				},
+			): Sandbox
+			evalInSandbox(
+				source: string,
+				sandbox: Sandbox,
+				version?: string,
+				filename?: string,
+				lineNo?: number,
+			): any
 			nukeSandbox(sandbox: Sandbox): void
 		}
 		manager: any
@@ -185,25 +232,33 @@ declare global {
 		importESModule(url: string): any
 		import(url: string): any
 
-		registerWindowActor(name: string, options: {
-			allFrames?: boolean
-			includeChrome?: boolean
-			matches?: string[]
-			remoteTypes?: string[]
-			parent?: { moduleURI?: string, esModuleURI?: string }
-			child?: {
-				moduleURI?: string
-				esModuleURI?: string
-				events?: Record<string, AddEventListenerOptions>
-				observers?: string[]
+		registerWindowActor(
+			name: string,
+			options: {
+				allFrames?: boolean
+				includeChrome?: boolean
+				matches?: string[]
+				remoteTypes?: string[]
+				parent?: { moduleURI?: string; esModuleURI?: string }
+				child?: {
+					moduleURI?: string
+					esModuleURI?: string
+					events?: Record<string, AddEventListenerOptions>
+					observers?: string[]
+				}
+				safeForUntrustedWebProcess: boolean
 			},
-			safeForUntrustedWebProcess: boolean,
-		}): void
+		): void
 		unregisterWindowActor(name: string): void
 
-		compileScript(url: string, options: {
-			charset?: string, lazilyParse?: boolean, hasReturnValue?: boolean,
-		}): {
+		compileScript(
+			url: string,
+			options: {
+				charset?: string
+				lazilyParse?: boolean
+				hasReturnValue?: boolean
+			},
+		): {
 			readonly url: string
 			readonly hasReturnValue: boolean
 			executeInGlobal(global: object): any
@@ -211,13 +266,19 @@ declare global {
 	}
 
 	class JSWindowActor {
-		sendAsyncMessage(messageName: string, obj: any,
-			transfers: Transferable[]): void
-		sendQuery(messageName: string, obj: any,
-			transfers?: Transferable[]): Promise<any>
+		sendAsyncMessage(
+			messageName: string,
+			obj: any,
+			transfers: Transferable[],
+		): void
+		sendQuery(
+			messageName: string,
+			obj: any,
+			transfers?: Transferable[],
+		): Promise<any>
 		receiveMessage(argument: ReceiveMessageArgument): any
 	}
-	class JSWindowActorParent extends JSWindowActor { }
+	class JSWindowActorParent extends JSWindowActor {}
 	class JSWindowActorChild extends JSWindowActor {
 		document?: Document
 		contentWindow?: Window

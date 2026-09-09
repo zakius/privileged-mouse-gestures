@@ -8,9 +8,14 @@ export function importTemplate(template: HTMLTemplateElement | string) {
 	return document.importNode(template.content, true)
 }
 
-export function defineBooleanAttribute(T: { prototype: HTMLElement }, attr: string) {
+export function defineBooleanAttribute(
+	T: { prototype: HTMLElement },
+	attr: string,
+) {
 	Object.defineProperty(T.prototype, attr, {
-		get(this: HTMLElement) { return this.hasAttribute(attr) },
+		get(this: HTMLElement) {
+			return this.hasAttribute(attr)
+		},
 		set(this: HTMLElement, value: boolean) {
 			if (value) this.setAttribute(attr, '')
 			else this.removeAttribute(attr)

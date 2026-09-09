@@ -1,9 +1,13 @@
-var { ExtensionCommon: {
-	EventManager,
-} } = ChromeUtils.importESModule('resource://gre/modules/ExtensionCommon.sys.mjs')
-var { ExtensionParent: {
-	apiManager: { global: { windowTracker } }
-} } = ChromeUtils.importESModule("resource://gre/modules/ExtensionParent.sys.mjs")
+var {
+	ExtensionCommon: { EventManager },
+} = ChromeUtils.importESModule('resource://gre/modules/ExtensionCommon.sys.mjs')
+var {
+	ExtensionParent: {
+		apiManager: {
+			global: { windowTracker },
+		},
+	},
+} = ChromeUtils.importESModule('resource://gre/modules/ExtensionParent.sys.mjs')
 
 type MouseEventDetails = browser.windowEvents.MouseEventDetails
 type WheelEventDetails = browser.windowEvents.WheelEventDetails
@@ -14,9 +18,11 @@ interface MouseEventOptions {
 }
 
 class windowEvents extends ExtensionAPI {
-	private registerMouseEvent(fire: { async(details: MouseEventDetails): void },
+	private registerMouseEvent(
+		fire: { async(details: MouseEventDetails): void },
 		type: 'mousedown' | 'mouseup' | 'mousemove' | 'contextmenu' | 'wheel',
-		context: BaseContext, options?: MouseEventOptions
+		context: BaseContext,
+		options?: MouseEventOptions,
 	) {
 		const { windowManager } = context.extension
 		const map = new WeakMap<Window, (e: MouseEvent) => void>()
@@ -34,21 +40,37 @@ class windowEvents extends ExtensionAPI {
 			} else {
 				const listener = (event: MouseEvent) => {
 					const {
-						altKey, button, buttons, screenX, screenY,
-						ctrlKey, metaKey, movementX, movementY, shiftKey
+						altKey,
+						button,
+						buttons,
+						screenX,
+						screenY,
+						ctrlKey,
+						metaKey,
+						movementX,
+						movementY,
+						shiftKey,
 					} = event
-					if (options && options.blockButtons != null && (
-						(button & options.blockButtons) || options.blockButtons === 0
-					)) {
+					if (
+						options &&
+						options.blockButtons != null &&
+						(button & options.blockButtons || options.blockButtons === 0)
+					) {
 						event.preventDefault()
 						event.stopPropagation()
 					}
 
 					const details = {
-						altKey, button, buttons,
+						altKey,
+						button,
+						buttons,
 						x: screenX - Math.round((wnd as any).mozInnerScreenX),
 						y: screenY - Math.round((wnd as any).mozInnerScreenY),
-						ctrlKey, metaKey, movementX, movementY, shiftKey,
+						ctrlKey,
+						metaKey,
+						movementX,
+						movementY,
+						shiftKey,
 						windowId: wrapper.id,
 						clientWidth: target.clientWidth,
 						clientHeight: target.clientHeight,
@@ -68,7 +90,9 @@ class windowEvents extends ExtensionAPI {
 		if (options && options.windowId != null) {
 			const wnd = windowManager.get(options.windowId, context).window
 			inject(wnd)
-			return () => { inject(wnd, true) }
+			return () => {
+				inject(wnd, true)
+			}
 		}
 
 		for (const wnd of windowTracker.browserWindows()) inject(wnd)
@@ -81,24 +105,34 @@ class windowEvents extends ExtensionAPI {
 
 	getAPIImpl = (that: this, context: BaseContext) => ({
 		onMouseDown: new EventManager<[MouseEventDetails], [MouseEventOptions?]>({
-			context, name: "windowEvents.onMouseDown", register: (fire, options) =>
-				that.registerMouseEvent(fire, 'mousedown', context, options)
+			context,
+			name: 'windowEvents.onMouseDown',
+			register: (fire, options) =>
+				that.registerMouseEvent(fire, 'mousedown', context, options),
 		}).api(),
 		onMouseUp: new EventManager<[MouseEventDetails], [MouseEventOptions?]>({
-			context, name: "windowEvents.onMouseUp", register: (fire, options) =>
-				that.registerMouseEvent(fire, 'mouseup', context, options)
+			context,
+			name: 'windowEvents.onMouseUp',
+			register: (fire, options) =>
+				that.registerMouseEvent(fire, 'mouseup', context, options),
 		}).api(),
 		onMouseMove: new EventManager<[MouseEventDetails], [MouseEventOptions?]>({
-			context, name: "windowEvents.onMouseMove", register: (fire, options) =>
-				that.registerMouseEvent(fire, 'mousemove', context, options)
+			context,
+			name: 'windowEvents.onMouseMove',
+			register: (fire, options) =>
+				that.registerMouseEvent(fire, 'mousemove', context, options),
 		}).api(),
 		onContextMenu: new EventManager<[MouseEventDetails], [MouseEventOptions?]>({
-			context, name: "windowEvents.onContextMenu", register: (fire, options) =>
-				that.registerMouseEvent(fire, 'contextmenu', context, options)
+			context,
+			name: 'windowEvents.onContextMenu',
+			register: (fire, options) =>
+				that.registerMouseEvent(fire, 'contextmenu', context, options),
 		}).api(),
 		onWheel: new EventManager<[WheelEventDetails], [MouseEventOptions?]>({
-			context, name: "windowEvents.onContextMenu", register: (fire, options) =>
-				that.registerMouseEvent(fire, 'wheel', context, options)
+			context,
+			name: 'windowEvents.onContextMenu',
+			register: (fire, options) =>
+				that.registerMouseEvent(fire, 'wheel', context, options),
 		}).api(),
 	})
 
@@ -109,17 +143,31 @@ class windowEvents extends ExtensionAPI {
 Object.assign(globalThis, { windowEvents })
 type windowEventsAPI = ReturnType<typeof windowEvents.prototype.getAPIImpl>
 // oxlint-disable-next-line no-unused-vars -- ambient API declaration
-declare namespace browser { const windowEvents: windowEventsAPI }
+declare namespace browser {
+	const windowEvents: windowEventsAPI
+}
 declare namespace browser.windowEvents {
-	interface MouseEventDetails extends Pick<MouseEvent,
-		'altKey' | 'button' | 'buttons' | 'x' | 'y' |
-		'ctrlKey' | 'metaKey' | 'movementX' | 'movementY' | 'shiftKey'> {
+	interface MouseEventDetails extends Pick<
+		MouseEvent,
+		| 'altKey'
+		| 'button'
+		| 'buttons'
+		| 'x'
+		| 'y'
+		| 'ctrlKey'
+		| 'metaKey'
+		| 'movementX'
+		| 'movementY'
+		| 'shiftKey'
+	> {
 		windowId: number
 		clientWidth: number
 		clientHeight: number
 		devicePixelRatio: number
 	}
 
-	interface WheelEventDetails extends MouseEventDetails, Pick<WheelEvent,
-		'deltaMode' | 'deltaX' | 'deltaY' | 'deltaZ'> { }
+	interface WheelEventDetails
+		extends
+			MouseEventDetails,
+			Pick<WheelEvent, 'deltaMode' | 'deltaX' | 'deltaY' | 'deltaZ'> {}
 }

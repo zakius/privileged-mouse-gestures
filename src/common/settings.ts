@@ -1,4 +1,4 @@
-import { RemoteSettings } from "../util/webext/settings.js";
+import { RemoteSettings } from '../util/webext/settings.js'
 
 export type CommandKey = keyof I18nMessages
 
@@ -25,11 +25,17 @@ export class Settings {
 	rockerGestures = true
 
 	gestureMappings: [string, CommandKey][] = [
-		['UR', 'newTab'], ['DR', 'closeTab'],
-		['L', 'back'], ['R', 'forward'], ['DU', 'upperLevel'],
-		['U', 'scrollUp'], ['D', 'scrollDown'],
-		['RU', 'scrollToTop'], ['RD', 'scrollToBottom'],
-		['WheelU', 'previousTab'], ['WheelD', 'nextTab'],
+		['UR', 'newTab'],
+		['DR', 'closeTab'],
+		['L', 'back'],
+		['R', 'forward'],
+		['DU', 'upperLevel'],
+		['U', 'scrollUp'],
+		['D', 'scrollDown'],
+		['RU', 'scrollToTop'],
+		['RD', 'scrollToBottom'],
+		['WheelU', 'previousTab'],
+		['WheelD', 'nextTab'],
 	]
 
 	// hidden
@@ -37,4 +43,4 @@ export class Settings {
 	distanceStep = 10
 }
 
-export const remoteSettings = new RemoteSettings(new Settings)
+export const remoteSettings = new RemoteSettings(new Settings())

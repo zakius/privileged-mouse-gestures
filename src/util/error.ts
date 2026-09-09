@@ -6,7 +6,9 @@ export class ExtendableError extends Error {
 }
 
 export class AssertionError extends ExtendableError {
-	constructor(message = 'assertion failed') { super(message) }
+	constructor(message = 'assertion failed') {
+		super(message)
+	}
 }
 
 export function assert(condition: any, message?: string) {
@@ -14,30 +16,41 @@ export function assert(condition: any, message?: string) {
 }
 
 export function unreachable(): never {
-	throw assert(false, "unreachable() called")
+	throw assert(false, 'unreachable() called')
 }
 
 export function abortError() {
-	return new DOMException("The operation was aborted. ", "AbortError")
+	return new DOMException('The operation was aborted. ', 'AbortError')
 }
 export function readOnlyError() {
 	return new DOMException(
-		"A mutation operation was attempted in a READ_ONLY transaction.",
-		"ReadOnlyError")
+		'A mutation operation was attempted in a READ_ONLY transaction.',
+		'ReadOnlyError',
+	)
 }
 
 export function isError(o: any): o is Error {
-	return o && typeof o.name === 'string' && typeof o.message === 'string' &&
+	return (
+		o &&
+		typeof o.name === 'string' &&
+		typeof o.message === 'string' &&
 		(o.stack === undefined || typeof o.stack === 'string')
+	)
 }
 
 export function isAbortError(error?: Error) {
-	return error && error.constructor.name === 'DOMException' &&
+	return (
+		error &&
+		error.constructor.name === 'DOMException' &&
 		error.name === 'AbortError'
+	)
 }
 
 export class ReportedError extends ExtendableError {
-	constructor(message: string, readonly detail?: string | number | Error) {
+	constructor(
+		message: string,
+		readonly detail?: string | number | Error,
+	) {
 		super(message)
 	}
 

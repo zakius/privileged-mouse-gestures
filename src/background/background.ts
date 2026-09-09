@@ -1,17 +1,21 @@
-import { registerRemoteHandler } from "../util/webext/remote.js";
-import { getCommandKeys, getCommandFunction } from './commands.js';
-import { MouseGestureListener } from './mouse-gesture.js';
-import { CommandKey } from "../common/settings.js";
-import { localSettings } from "./settings.js";
-import { M } from "../util/webext/i18n.js";
+import { registerRemoteHandler } from '../util/webext/remote.js'
+import { getCommandKeys, getCommandFunction } from './commands.js'
+import { MouseGestureListener } from './mouse-gesture.js'
+import { CommandKey } from '../common/settings.js'
+import { localSettings } from './settings.js'
+import { M } from '../util/webext/i18n.js'
 
 let gestureMappings = new Map<string, CommandKey>()
-localSettings.listen('gestureMappings', m => { gestureMappings = new Map(m) })
+localSettings.listen('gestureMappings', (m) => {
+	gestureMappings = new Map(m)
+})
 
 let recordGesturePorts = new Set<browser.runtime.Port>()
-browser.runtime.onConnect.addListener(port => {
+browser.runtime.onConnect.addListener((port) => {
 	recordGesturePorts.add(port)
-	port.onDisconnect.addListener(() => { recordGesturePorts.delete(port) })
+	port.onDisconnect.addListener(() => {
+		recordGesturePorts.delete(port)
+	})
 })
 
 const mouseGestureListener = new MouseGestureListener()
@@ -38,6 +42,8 @@ mouseGestureListener.onGetStatus = (gesture) => {
 }
 
 export class BackgroundRemote {
-	async getCommandKeys() { return getCommandKeys() }
+	async getCommandKeys() {
+		return getCommandKeys()
+	}
 }
-registerRemoteHandler(new BackgroundRemote)
+registerRemoteHandler(new BackgroundRemote())

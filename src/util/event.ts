@@ -3,14 +3,22 @@ export class SimpleEventListener<Ts extends any[]> {
 	private static readonly defaultType = 'event'
 
 	listen(fn: (...args: Ts) => unknown, type = SimpleEventListener.defaultType) {
-		const handler = (event: Event) => { fn(...(event as CustomEvent<Ts>).detail) }
+		const handler = (event: Event) => {
+			fn(...(event as CustomEvent<Ts>).detail)
+		}
 		const { eventTarget } = this
 		eventTarget.addEventListener(type, handler)
-		return { destroy() { eventTarget.removeEventListener(type, handler) } }
+		return {
+			destroy() {
+				eventTarget.removeEventListener(type, handler)
+			},
+		}
 	}
 
 	dispatchWithType(type: string, ...args: Ts) {
-		return this.eventTarget.dispatchEvent(new CustomEvent(type, { detail: args }))
+		return this.eventTarget.dispatchEvent(
+			new CustomEvent(type, { detail: args }),
+		)
 	}
 
 	dispatch(...args: Ts) {
