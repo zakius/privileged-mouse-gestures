@@ -85,7 +85,7 @@ class windowOverlay extends ExtensionAPI {
 }
 Object.assign(globalThis, { windowOverlay })
 type windowOverlayAPI = ReturnType<typeof windowOverlay.prototype.getAPIImpl>
-// oxlint-disable-next-line no-unused-vars -- ambient API declaration
 declare namespace browser {
+	// oxlint-disable-next-line no-unused-vars -- ambient API declaration
 	const windowOverlay: windowOverlayAPI
 }

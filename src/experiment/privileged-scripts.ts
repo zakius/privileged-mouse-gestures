@@ -191,7 +191,7 @@ Object.assign(globalThis, { privilegedScripts })
 type privilegedScriptsAPI = ReturnType<
 	typeof privilegedScripts.prototype.getAPIImpl
 >
-// oxlint-disable-next-line no-unused-vars -- ambient API declaration
 declare namespace browser {
+	// oxlint-disable-next-line no-unused-vars -- ambient API declaration
 	const privilegedScripts: privilegedScriptsAPI
 }

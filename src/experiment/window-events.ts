@@ -142,8 +142,8 @@ class windowEvents extends ExtensionAPI {
 }
 Object.assign(globalThis, { windowEvents })
 type windowEventsAPI = ReturnType<typeof windowEvents.prototype.getAPIImpl>
-// oxlint-disable-next-line no-unused-vars -- ambient API declaration
 declare namespace browser {
+	// oxlint-disable-next-line no-unused-vars -- ambient API declaration
 	const windowEvents: windowEventsAPI
 }
 declare namespace browser.windowEvents {
