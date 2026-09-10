@@ -18,16 +18,18 @@ class windowOverlay extends ExtensionAPI {
 			{ x = 0, y = 0, disableScaling = false } = {},
 		) {
 			const { extension } = context
-			const { windowManager } = extension
-			const wnd = windowManager.get(windowId, context).window
-
 			const key = that.overlayKey(extension, windowId)
 			let canvasData = that.overlayMap.get(key)
 
+			// Before touching the window: a gesture can bind Close Window or
+			// Quit, and the teardown that follows would then run against a
+			// window that no longer exists.
 			if (!imageData) {
 				if (canvasData) canvasData.onClose.close()
 				return
 			}
+
+			const wnd = extension.windowManager.get(windowId, context).window
 
 			const parent = wnd.document.documentElement
 			if (!canvasData) {

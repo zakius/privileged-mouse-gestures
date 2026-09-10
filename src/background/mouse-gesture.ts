@@ -267,6 +267,11 @@ export class MouseGestureListener {
 		browser.windowEvents.onContextMenu.removeListener(this.onContextMenu)
 	}
 
+	/** Registered only for its preventClick option; the experiment does the
+	 * work. Blocking the mouseup outright is not an option -- ending the
+	 * selection drag its own mousedown started is that event's job. */
+	private readonly onGestureMouseUp = () => {}
+
 	private readonly onWheel = ({ deltaX, deltaY }: WheelEventDetails) => {
 		if (!this.downDetails) return
 		const direction =
@@ -336,6 +341,13 @@ export class MouseGestureListener {
 			windowId: this.downDetails.windowId,
 			blockButtons: this.downDetails.button,
 		})
+		// Suppressing the context menu still leaves Gecko firing a trusted
+		// click or auxclick from the button cycle the gesture just consumed,
+		// which activates whatever the pointer finished on.
+		browser.windowEvents.onMouseUp.addListener(this.onGestureMouseUp, {
+			windowId: this.downDetails.windowId,
+			preventClick: true,
+		})
 	}
 
 	private stopNormalGestures() {
@@ -360,6 +372,7 @@ export class MouseGestureListener {
 		this.stopNormalGestures()
 		this.downDetails = undefined
 		browser.windowEvents.onContextMenu.removeListener(this.onContextMenu)
+		browser.windowEvents.onMouseUp.removeListener(this.onGestureMouseUp)
 		browser.windowEvents.onWheel.removeListener(this.onWheel)
 	}
 
