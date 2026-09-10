@@ -3,6 +3,28 @@ import { importTemplateElement } from '../util/dom.js'
 
 type MouseEventDetails = browser.windowEvents.MouseEventDetails
 type WheelEventDetails = browser.windowEvents.WheelEventDetails
+type MouseEventOptions = NonNullable<
+	Parameters<typeof browser.windowEvents.onMouseUp.addListener>[1]
+>
+interface WindowEvent<Details> {
+	addListener(
+		listener: (details: Details) => void,
+		options?: MouseEventOptions,
+	): void
+	removeListener(listener: (details: Details) => void): void
+}
+
+/** addListener ignores a callback it already holds, options and all, so a
+ * registration left behind by a window that closed mid-gesture would keep
+ * pointing at that window and silently swallow the next one. */
+function relisten<Details>(
+	event: WindowEvent<Details>,
+	listener: (details: Details) => void,
+	options: MouseEventOptions,
+) {
+	event.removeListener(listener)
+	event.addListener(listener, options)
+}
 
 function getDistance(v0: MouseEventDetails, v1: MouseEventDetails) {
 	return Math.hypot(v0.x - v1.x, v0.y - v1.y)
@@ -99,12 +121,12 @@ export class MouseGestureListener {
 		if (details.buttons !== buttonToButtons[details.button]) return
 		this.downDetails = this.lastDetails = details
 		this.currentCode = ''
-		browser.windowEvents.onMouseMove.addListener(this.onMouseMove, {
+		relisten(browser.windowEvents.onMouseMove, this.onMouseMove, {
 			windowId: details.windowId,
 		})
 
 		if (S.wheelGestures)
-			browser.windowEvents.onWheel.addListener(this.onWheel, {
+			relisten(browser.windowEvents.onWheel, this.onWheel, {
 				blockButtons: 0,
 				windowId: details.windowId,
 			})
@@ -305,18 +327,18 @@ export class MouseGestureListener {
 		// the selection drag the left one started. Swallowing the movement is
 		// what stops that drag extending while the command scrolls the page
 		// underneath the still-held cursor.
-		browser.windowEvents.onMouseMove.addListener(this.onRockerBlockMenu, {
+		relisten(browser.windowEvents.onMouseMove, this.onRockerBlockMenu, {
 			windowId,
 			blockButtons: 0,
 		})
-		browser.windowEvents.onContextMenu.addListener(this.onRockerBlockMenu, {
+		relisten(browser.windowEvents.onContextMenu, this.onRockerBlockMenu, {
 			windowId,
 			blockButtons: 0,
 		})
 		// The left mouseup has to reach the page: ending that drag is its job,
 		// and there is no blocked mousedown for it to be the counterpart of.
 		// preventClick keeps it from also clicking whatever is underneath.
-		browser.windowEvents.onMouseUp.addListener(this.onRockerBlockMenu, {
+		relisten(browser.windowEvents.onMouseUp, this.onRockerBlockMenu, {
 			windowId,
 			blockButtons: 2,
 			preventClick: true,
@@ -337,14 +359,14 @@ export class MouseGestureListener {
 
 	private blockContextMenu() {
 		if (!this.downDetails) return
-		browser.windowEvents.onContextMenu.addListener(this.onContextMenu, {
+		relisten(browser.windowEvents.onContextMenu, this.onContextMenu, {
 			windowId: this.downDetails.windowId,
 			blockButtons: this.downDetails.button,
 		})
 		// Suppressing the context menu still leaves Gecko firing a trusted
 		// click or auxclick from the button cycle the gesture just consumed,
 		// which activates whatever the pointer finished on.
-		browser.windowEvents.onMouseUp.addListener(this.onGestureMouseUp, {
+		relisten(browser.windowEvents.onMouseUp, this.onGestureMouseUp, {
 			windowId: this.downDetails.windowId,
 			preventClick: true,
 		})
