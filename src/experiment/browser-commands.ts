@@ -106,10 +106,12 @@ class browserCommands extends ExtensionAPI {
 	}
 
 	getAPIImpl = (context: BaseContext) => {
-		// The options page has no window of its own to ask about.
+		// The options page has no window of its own to ask about, and the
+		// topmost one may be private; getTopWindow skips those unless the
+		// extension is allowed in private browsing.
 		const getWindow = (windowId?: number) =>
 			windowId == null
-				? extensionAPIManager.global.windowTracker.topWindow
+				? extensionAPIManager.global.windowTracker.getTopWindow(context)
 				: context.extension.windowManager.get(windowId, context).window
 
 		return {

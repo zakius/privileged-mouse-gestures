@@ -6,8 +6,6 @@ export type CommandKey = string
 export type BuiltinCommandKey = keyof I18nMessages
 
 export class Settings {
-	version = 0
-
 	mouseGestureButton: 'left' | 'middle' | 'right' = 'right'
 	displayTrace = true
 	traceColor = '#0652ff'
