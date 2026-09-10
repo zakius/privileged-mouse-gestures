@@ -92,9 +92,6 @@
   "tab": {
     "message": "Tab"
   },
-  "newTab": {
-    "message": "New Tab"
-  },
   "closeTab": {
     "message": "Close Tab"
   },
@@ -115,9 +112,6 @@
   },
   "forward": {
     "message": "Forward"
-  },
-  "stop": {
-    "message": "Stop"
   },
   "reload": {
     "message": "Reload"

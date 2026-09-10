@@ -28,17 +28,17 @@ export class Settings {
 	rockerGestures = true
 
 	gestureMappings: [string, CommandKey][] = [
-		['UR', 'newTab'],
+		['UR', 'cmd_newNavigatorTab'],
 		['DR', 'closeTab'],
-		['L', 'back'],
-		['R', 'forward'],
+		['L', 'Browser:Back'],
+		['R', 'Browser:Forward'],
 		['DU', 'upperLevel'],
 		['U', 'scrollUp'],
 		['D', 'scrollDown'],
 		['RU', 'scrollToTop'],
 		['RD', 'scrollToBottom'],
-		['WheelU', 'previousTab'],
-		['WheelD', 'nextTab'],
+		['WheelU', 'Browser:PrevTab'],
+		['WheelD', 'Browser:NextTab'],
 	]
 
 	// hidden

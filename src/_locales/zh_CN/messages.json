@@ -92,9 +92,6 @@
   "tab": {
     "message": "标签页"
   },
-  "newTab": {
-    "message": "新建标签页"
-  },
   "closeTab": {
     "message": "关闭标签页"
   },
@@ -115,9 +112,6 @@
   },
   "forward": {
     "message": "前进"
-  },
-  "stop": {
-    "message": "停止载入"
   },
   "reload": {
     "message": "重新载入"

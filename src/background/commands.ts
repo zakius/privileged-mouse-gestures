@@ -12,65 +12,38 @@ function tabCommand(next: (tab: browser.tabs.Tab, windowId: number) => void) {
 	}
 }
 
-function contentCommand<Ts extends any[]>(
-	code: (...args: Ts) => void,
-	...args: Ts
-) {
+function docShellCommand(cmd: string) {
 	return tabCommand((tab) => {
 		browser.privilegedScripts.executeScript({
 			tabId: tab.id,
-			code: `(${code})(${args.map((v) => JSON.stringify(v)).join(', ')})`,
+			code: `window.docShell.doCommand(${JSON.stringify(cmd)})`,
 		})
 	})
 }
 
-function docShellCommand(cmd: string) {
-	return contentCommand((cmd: string) => {
-		;(window as any).docShell.doCommand(cmd)
-	}, cmd)
-}
-
-const commandList: [SectionKey, [BuiltinCommandKey, CommandFunction][]][] = [
+/** Commands browser.browserCommands.getAll() cannot offer on its own, as
+ * `[id, name, implementation?]`.
+ *
+ * Without an implementation the entry is a Firefox command that no labelled
+ * element references, so there is no name to read off it -- about:keyboard has
+ * the same problem and ships its own strings (customkeys-nav-back and friends).
+ * The rest are actions Firefox has no command for at all. */
+const commandList: [
+	SectionKey,
+	[CommandKey, BuiltinCommandKey, CommandFunction?][],
+][] = [
 	[
 		'tab',
 		[
+			['Browser:PrevTab', 'previousTab'],
+			['Browser:NextTab', 'nextTab'],
+			['Browser:DuplicateTab', 'duplicateTab'],
 			[
-				'newTab',
-				(windowId) => {
-					void browser.tabs.create({ windowId })
-				},
-			],
-			[
+				// Firefox's own cmd_close closes pinned tabs too.
+				'closeTab',
 				'closeTab',
 				tabCommand((tab) => {
 					if (!tab.pinned) browser.tabs.remove(tab.id!)
-				}),
-			],
-			[
-				'previousTab',
-				tabCommand(async (tab, windowId) => {
-					if (tab.index <= 0) return
-					const query = await browser.tabs.query({
-						windowId,
-						index: tab.index - 1,
-					})
-					if (query) void browser.tabs.update(query[0].id!, { active: true })
-				}),
-			],
-			[
-				'nextTab',
-				tabCommand(async (tab, windowId) => {
-					const query = await browser.tabs.query({
-						windowId,
-						index: tab.index + 1,
-					})
-					if (query) void browser.tabs.update(query[0].id!, { active: true })
-				}),
-			],
-			[
-				'duplicateTab',
-				tabCommand((tab) => {
-					browser.tabs.duplicate(tab.id!)
 				}),
 			],
 		],
@@ -78,31 +51,11 @@ const commandList: [SectionKey, [BuiltinCommandKey, CommandFunction][]][] = [
 	[
 		'navigation',
 		[
+			['Browser:Back', 'back'],
+			['Browser:Forward', 'forward'],
+			['Browser:Reload', 'reload'],
 			[
-				'back',
-				contentCommand(() => {
-					history.back()
-				}),
-			],
-			[
-				'forward',
-				contentCommand(() => {
-					history.forward()
-				}),
-			],
-			[
-				'stop',
-				contentCommand(() => {
-					window.stop()
-				}),
-			],
-			[
-				'reload',
-				tabCommand((tab) => {
-					browser.tabs.reload(tab.id!)
-				}),
-			],
-			[
+				'upperLevel',
 				'upperLevel',
 				tabCommand((tab) => {
 					let url = new URL(tab.url!)
@@ -120,15 +73,18 @@ const commandList: [SectionKey, [BuiltinCommandKey, CommandFunction][]][] = [
 	[
 		'page',
 		[
-			['scrollUp', docShellCommand('cmd_scrollPageUp')],
-			['scrollDown', docShellCommand('cmd_scrollPageDown')],
-			['scrollToTop', docShellCommand('cmd_scrollTop')],
-			['scrollToBottom', docShellCommand('cmd_scrollBottom')],
+			// Scrolling exists only as a docShell command.
+			['scrollUp', 'scrollUp', docShellCommand('cmd_scrollPageUp')],
+			['scrollDown', 'scrollDown', docShellCommand('cmd_scrollPageDown')],
+			['scrollToTop', 'scrollToTop', docShellCommand('cmd_scrollTop')],
+			['scrollToBottom', 'scrollToBottom', docShellCommand('cmd_scrollBottom')],
 		],
 	],
 ]
 const commandMap = new Map<CommandKey, CommandFunction>(
-	commandList.flatMap(([_, items]) => items),
+	commandList.flatMap(([_, items]) =>
+		items.flatMap(([id, , fn]) => (fn ? [[id, fn] as const] : [])),
+	),
 )
 
 interface CommandSection {
@@ -136,12 +92,12 @@ interface CommandSection {
 	items: { id: CommandKey; label: string }[]
 }
 
-/** The commands this extension implements, then everything the browser and the
- * installed extensions expose, grouped by the category each reports. */
+/** The commands above, then everything the browser and the installed extensions
+ * expose, grouped by the category each reports. */
 export async function getCommandList(): Promise<CommandSection[]> {
 	const sections: CommandSection[] = commandList.map(([section, items]) => ({
 		category: M[section],
-		items: items.map(([id]) => ({ id, label: M[id] })),
+		items: items.map(([id, name]) => ({ id, label: M[name] })),
 	}))
 
 	const dynamic = new Map<string, CommandSection['items']>()
