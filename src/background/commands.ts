@@ -131,7 +131,7 @@ const commandMap = new Map<CommandKey, CommandFunction>(
 	commandList.flatMap(([_, items]) => items),
 )
 
-export interface CommandSection {
+interface CommandSection {
 	category: string
 	items: { id: CommandKey; label: string }[]
 }

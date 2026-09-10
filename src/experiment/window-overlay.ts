@@ -66,17 +66,6 @@ class windowOverlay extends ExtensionAPI {
 			}
 			canvas.getContext('2d')!.putImageData(imageData, x, y)
 		},
-
-		async getWindowSize(windowId: number) {
-			const wnd = context.extension.windowManager.get(windowId, context).window
-			const parent = wnd.document.documentElement
-			const { devicePixelRatio } = wnd
-			return {
-				width: parent.clientWidth,
-				height: parent.clientHeight,
-				devicePixelRatio,
-			}
-		},
 	})
 
 	getAPI(context: BaseContext) {

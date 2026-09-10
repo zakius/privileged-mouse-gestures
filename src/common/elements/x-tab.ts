@@ -1,6 +1,6 @@
 import { defineBooleanAttribute } from '../../util/dom.js'
 
-export class XActivatableElement extends HTMLElement {
+class XActivatableElement extends HTMLElement {
 	active!: boolean
 	static observedAttributes = ['active']
 
