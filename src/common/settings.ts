@@ -30,8 +30,8 @@ export class Settings {
 	gestureMappings: [string, CommandKey][] = [
 		['UR', 'cmd_newNavigatorTab'],
 		['DR', 'closeTab'],
-		['L', 'Browser:Back'],
-		['R', 'Browser:Forward'],
+		['L', 'Browser:BackOrBackDuplicate'],
+		['R', 'Browser:ForwardOrForwardDuplicate'],
 		['DU', 'upperLevel'],
 		['U', 'scrollUp'],
 		['D', 'scrollDown'],

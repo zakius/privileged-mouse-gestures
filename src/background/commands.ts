@@ -51,9 +51,6 @@ const commandList: [
 	[
 		'navigation',
 		[
-			['Browser:Back', 'back'],
-			['Browser:Forward', 'forward'],
-			['Browser:Reload', 'reload'],
 			[
 				'upperLevel',
 				'upperLevel',

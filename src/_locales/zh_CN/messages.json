@@ -107,15 +107,6 @@
   "navigation": {
     "message": "导航"
   },
-  "back": {
-    "message": "后退"
-  },
-  "forward": {
-    "message": "前进"
-  },
-  "reload": {
-    "message": "重新载入"
-  },
   "upperLevel": {
     "message": "向上一级"
   },

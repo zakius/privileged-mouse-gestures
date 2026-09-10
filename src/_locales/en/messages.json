@@ -107,15 +107,6 @@
   "navigation": {
     "message": "Navigation"
   },
-  "back": {
-    "message": "Back"
-  },
-  "forward": {
-    "message": "Forward"
-  },
-  "reload": {
-    "message": "Reload"
-  },
   "upperLevel": {
     "message": "Upper Level"
   },
