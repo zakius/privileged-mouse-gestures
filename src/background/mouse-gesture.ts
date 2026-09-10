@@ -294,16 +294,39 @@ export class MouseGestureListener {
 					: undefined
 		if (!direction) return
 		this.onGesture('Rocker' + direction, details.windowId)
-		for (const event of ['onMouseUp', 'onContextMenu'] as const)
-			browser.windowEvents[event].addListener(this.onRockerBlockMenu, {
-				windowId: details.windowId,
-				blockButtons: 0,
-			})
+
+		const { windowId } = details
+		// Neither button's mousedown was blocked, so the page is still running
+		// the selection drag the left one started. Swallowing the movement is
+		// what stops that drag extending while the command scrolls the page
+		// underneath the still-held cursor.
+		browser.windowEvents.onMouseMove.addListener(this.onRockerBlockMenu, {
+			windowId,
+			blockButtons: 0,
+		})
+		browser.windowEvents.onContextMenu.addListener(this.onRockerBlockMenu, {
+			windowId,
+			blockButtons: 0,
+		})
+		// The left mouseup has to reach the page: ending that drag is its job,
+		// and there is no blocked mousedown for it to be the counterpart of.
+		// preventClick keeps it from also clicking whatever is underneath.
+		browser.windowEvents.onMouseUp.addListener(this.onRockerBlockMenu, {
+			windowId,
+			blockButtons: 2,
+			preventClick: true,
+		})
 	}
+
+	private static readonly rockerBlockedEvents = [
+		'onMouseMove',
+		'onMouseUp',
+		'onContextMenu',
+	] as const
 
 	private readonly onRockerBlockMenu = (details: MouseEventDetails) => {
 		if (details.buttons) return
-		for (const event of ['onMouseUp', 'onContextMenu'] as const)
+		for (const event of MouseGestureListener.rockerBlockedEvents)
 			browser.windowEvents[event].removeListener(this.onRockerBlockMenu)
 	}
 

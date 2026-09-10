@@ -15,6 +15,9 @@ type WheelEventDetails = browser.windowEvents.WheelEventDetails
 interface MouseEventOptions {
 	windowId?: number
 	blockButtons?: number
+	/** Cancel the click this event would otherwise produce, without blocking
+	 * the event itself. Chrome-context only, which is where this runs. */
+	preventClick?: boolean
 }
 
 class windowEvents extends ExtensionAPI {
@@ -51,6 +54,7 @@ class windowEvents extends ExtensionAPI {
 						movementY,
 						shiftKey,
 					} = event
+					if (options?.preventClick) (event as any).preventClickEvent?.()
 					if (
 						options &&
 						options.blockButtons != null &&
