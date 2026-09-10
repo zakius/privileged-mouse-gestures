@@ -7,23 +7,46 @@ const ADDON_COMMAND_PREFIX = 'addon:'
 // Firefox has no registry of invokable commands. about:keyboard builds its own
 // list by walking the menu bar and hardcoding the rest (CustomKeysParent.getKeys);
 // this keys off <command> elements instead, which cover every menu bar action
-// plus the ones that never appear in a menu, and borrows labels from whichever
-// element references each command -- Fluent has already localized those by the
-// time we read them.
+// plus the ones that never appear in a menu, and borrows names and categories
+// from whichever element references each command -- Fluent has already
+// localized those by the time we read them.
 class browserCommands extends ExtensionAPI {
 	private static collectChromeCommands(wnd: Window) {
-		// A command is referenced from several places; the menu bar copy is the
-		// one worth having, because it carries a label and, through its ancestor
-		// <menu>, the category the command is filed under. Context menus come
-		// first in DOM order, so without ranking, Cut/Copy/Paste get attributed
-		// to the page context menu instead of Edit.
+		// A command reached from a context menu acts on whatever was
+		// right-clicked, which does not exist when a gesture fires, so ignore
+		// those referrers. Any popup named by a context="..." attribute is one.
+		const contextMenuIds = new Set<string>()
+		for (const el of wnd.document.querySelectorAll('[context]'))
+			contextMenuIds.add(el.getAttribute('context')!)
+		const inContextMenu = (el: Element) => {
+			for (let n: Element | null = el; n; n = n.parentElement)
+				if (n.id && contextMenuIds.has(n.id)) return true
+			return false
+		}
+
+		// The menu bar copy of a command is the one worth having: it is what
+		// about:keyboard lists, and its ancestor <menu> names the category.
 		const rank = (el: Element) =>
 			(el.closest('#main-menubar') ? 2 : 0) +
 			(el.localName === 'menuitem' ? 1 : 0)
 
+		// Same categories about:keyboard shows, taken from the same places: a
+		// menu bar menu names itself, and Firefox gives its toolbars and panels
+		// an aria-label -- #nav-bar is "Navigation", #downloadsPanel is
+		// "Downloads". Both are localized already.
+		const categoryOf = (el: Element) => {
+			for (let n = el.parentElement; n; n = n.parentElement) {
+				if (n.localName === 'menu' && (n as any).label)
+					return (n as any).label as string
+				const ariaLabel = n.getAttribute('aria-label')
+				if (ariaLabel) return ariaLabel
+			}
+			return null
+		}
+
 		const referrers = new Map<string, Element>()
 		for (const el of wnd.document.querySelectorAll('[command]')) {
-			if (!(el as any).label) continue
+			if (!(el as any).label || inContextMenu(el)) continue
 			const id = el.getAttribute('command')!
 			const previous = referrers.get(id)
 			if (previous && rank(previous) >= rank(el)) continue
@@ -33,13 +56,12 @@ class browserCommands extends ExtensionAPI {
 		const result = []
 		for (const { id } of wnd.document.querySelectorAll('command[id]')) {
 			const referrer = referrers.get(id)
-			// No label means no way to present it in a list: downloads panel
-			// commands, touch gesture internals and similar.
+			// Nothing labelled points at it, so there is no name to show.
 			if (!referrer) continue
 			result.push({
 				id,
 				label: (referrer as any).label as string,
-				category: (referrer.closest('menu') as any)?.label ?? null,
+				category: categoryOf(referrer),
 			})
 		}
 		return result

@@ -92,20 +92,19 @@ interface CommandSection {
 /** The commands above, then everything the browser and the installed extensions
  * expose, grouped by the category each reports. */
 export async function getCommandList(): Promise<CommandSection[]> {
-	const sections: CommandSection[] = commandList.map(([section, items]) => ({
-		category: M[section],
-		items: items.map(([id, name]) => ({ id, label: M[name] })),
-	}))
-
-	const dynamic = new Map<string, CommandSection['items']>()
+	// Keyed by name so the sections above merge with the browser's own: both
+	// call the same category "Navigation".
+	const sections = new Map<string, CommandSection['items']>()
+	for (const [section, items] of commandList)
+		mapInsert(sections, M[section], () => []).push(
+			...items.map(([id, name]) => ({ id, label: M[name] })),
+		)
 	for (const { id, label, category } of await browser.browserCommands.getAll())
-		mapInsert(dynamic, category ?? M.otherCommands, () => []).push({
+		mapInsert(sections, category ?? M.otherCommands, () => []).push({
 			id,
 			label,
 		})
-	for (const [category, items] of dynamic) sections.push({ category, items })
-
-	return sections
+	return [...sections].map(([category, items]) => ({ category, items }))
 }
 
 export function getCommandFunction(key: CommandKey): CommandFunction {
