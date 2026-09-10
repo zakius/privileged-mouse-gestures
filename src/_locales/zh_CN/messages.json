@@ -139,5 +139,8 @@
   },
   "scrollToBottom": {
     "message": "滚动到底部"
+  },
+  "otherCommands": {
+    "message": "其他"
   }
 }

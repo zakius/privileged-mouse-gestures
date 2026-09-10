@@ -1,6 +1,9 @@
 import { RemoteSettings } from '../util/webext/settings.js'
 
-export type CommandKey = keyof I18nMessages
+// Either a key from _locales (a command this extension implements itself) or an
+// id from browser.browserCommands.getAll().
+export type CommandKey = string
+export type BuiltinCommandKey = keyof I18nMessages
 
 export class Settings {
 	version = 0

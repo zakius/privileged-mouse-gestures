@@ -139,5 +139,8 @@
   },
   "scrollToBottom": {
     "message": "Scroll to Bottom"
+  },
+  "otherCommands": {
+    "message": "Other"
   }
 }

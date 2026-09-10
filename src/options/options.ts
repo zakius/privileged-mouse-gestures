@@ -11,7 +11,7 @@ const mappingRowTemplate = document.getElementById(
 ) as HTMLTemplateElement
 const mappingTBody = document.querySelector('#mapping-table tbody')!
 
-backgroundRemote.getCommandKeys().then(async (sections) => {
+backgroundRemote.getCommandList().then(async (sections) => {
 	applyI18nAttr('title', mappingRowTemplate.content)
 
 	const commandSelectTemplate = mappingRowTemplate.content.querySelector(
@@ -20,15 +20,15 @@ backgroundRemote.getCommandKeys().then(async (sections) => {
 	while (commandSelectTemplate.firstChild)
 		commandSelectTemplate.firstChild.remove()
 
-	for (const [section, items] of sections) {
+	for (const { category, items } of sections) {
 		const optgroup = document.createElement('optgroup')
-		optgroup.label = M[section]
+		optgroup.label = category
 		commandSelectTemplate.append(optgroup)
 
-		for (const item of items) {
+		for (const { id, label } of items) {
 			const option = document.createElement('option')
-			option.value = item
-			option.textContent = M[item]
+			option.value = id
+			option.textContent = label
 			optgroup.append(option)
 		}
 	}

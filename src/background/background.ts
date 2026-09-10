@@ -1,9 +1,8 @@
 import { registerRemoteHandler } from '../util/webext/remote.js'
-import { getCommandKeys, getCommandFunction } from './commands.js'
+import { getCommandList, getCommandFunction } from './commands.js'
 import { MouseGestureListener } from './mouse-gesture.js'
 import { CommandKey } from '../common/settings.js'
 import { localSettings } from './settings.js'
-import { M } from '../util/webext/i18n.js'
 
 let gestureMappings = new Map<string, CommandKey>()
 localSettings.listen('gestureMappings', (m) => {
@@ -31,19 +30,30 @@ mouseGestureListener.onGesture = (gesture, windowId) => {
 
 	const key = gestureMappings.get(gesture)
 	if (!key) return
-	const fn = getCommandFunction(key)
-	if (fn) fn(windowId)
+	getCommandFunction(key)(windowId)
 }
 mouseGestureListener.onGetStatus = (gesture) => {
 	let status = gesture
 	const key = gestureMappings.get(gesture)
-	if (key) status += ': ' + M[key]
+	if (key) status += ': ' + (commandLabels.get(key) ?? key)
 	return status
 }
 
+// Labels for browser and extension commands only exist in the chrome window, so
+// keep the last fetched set around for the gesture status overlay.
+let commandLabels = new Map<CommandKey, string>()
+async function loadCommandList() {
+	const sections = await getCommandList()
+	commandLabels = new Map(
+		sections.flatMap((s) => s.items.map((i) => [i.id, i.label] as const)),
+	)
+	return sections
+}
+void loadCommandList()
+
 export class BackgroundRemote {
-	async getCommandKeys() {
-		return getCommandKeys()
+	async getCommandList() {
+		return loadCommandList()
 	}
 }
 registerRemoteHandler(new BackgroundRemote())

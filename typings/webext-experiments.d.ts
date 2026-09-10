@@ -44,6 +44,23 @@ interface WindowTracker {
 	removeProgressListener(window: Window, listener: object): void
 }
 
+interface ExtensionShortcuts {
+	allCommands(): Promise<
+		{ name: string; description?: string; shortcut?: string }[]
+	>
+	onCommand(name: string): void
+}
+
+interface ExtensionAction {
+	triggerAction(window: Window): void
+}
+
+interface WebExtensionPolicy {
+	readonly id: string
+	readonly name: string
+	readonly extension?: Extension
+}
+
 interface FallbackTabSize {
 	width: number
 	height: number
@@ -208,6 +225,8 @@ declare global {
 		getURL(path: string): string
 		readonly tabManager: TabManager
 		readonly windowManager: WindowManager
+		readonly manifestVersion: number
+		readonly shortcuts?: ExtensionShortcuts
 	}
 
 	interface BaseContext {
@@ -223,7 +242,23 @@ declare global {
 		}
 		importESModule(url: 'resource://gre/modules/ExtensionParent.sys.mjs'): {
 			ExtensionParent: {
-				apiManager: { global: { windowTracker: WindowTracker } }
+				apiManager: {
+					global: {
+						windowTracker: WindowTracker
+						browserActionFor(
+							this: void,
+							extension: Extension,
+						): ExtensionAction | undefined
+						pageActionFor(
+							this: void,
+							extension: Extension,
+						): ExtensionAction | undefined
+						sidebarActionFor(
+							this: void,
+							extension: Extension,
+						): ExtensionAction | undefined
+					}
+				}
 			}
 		}
 		importESModule(url: 'resource://gre/modules/ExtensionUtils.sys.mjs'): {
@@ -289,6 +324,11 @@ declare global {
 		target: unknown
 		name: string
 		data: any
+	}
+
+	const WebExtensionPolicy: {
+		getActiveExtensions(): WebExtensionPolicy[]
+		getByID(id: string): WebExtensionPolicy | null
 	}
 
 	const IOUtils: any

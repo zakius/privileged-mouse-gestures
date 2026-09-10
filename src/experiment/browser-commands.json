@@ -1,0 +1,22 @@
+[
+  {
+    "namespace": "browserCommands",
+    "functions": [
+      {
+        "name": "getAll",
+        "type": "function",
+        "async": true,
+        "allowAmbiguousOptionalArguments": true,
+        "parameters": []
+      },
+      {
+        "name": "run",
+        "type": "function",
+        "async": true,
+        "allowAmbiguousOptionalArguments": true,
+        "parameters": []
+      }
+    ],
+    "events": []
+  }
+]

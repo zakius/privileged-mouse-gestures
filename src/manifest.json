@@ -60,6 +60,20 @@
           ]
         ]
       }
+    },
+    "browserCommands": {
+      "schema": "experiment/browser-commands.json",
+      "parent": {
+        "scopes": [
+          "addon_parent"
+        ],
+        "script": "experiment/browser-commands.js",
+        "paths": [
+          [
+            "browserCommands"
+          ]
+        ]
+      }
     }
   },
   "background": {

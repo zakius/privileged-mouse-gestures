@@ -1,4 +1,6 @@
-import { CommandKey } from '../common/settings.js'
+import { BuiltinCommandKey, CommandKey } from '../common/settings.js'
+import { mapInsert } from '../util/util.js'
+import { M } from '../util/webext/i18n.js'
 
 type SectionKey = keyof I18nMessages
 type CommandFunction = (windowId: number) => void
@@ -28,7 +30,7 @@ function docShellCommand(cmd: string) {
 	}, cmd)
 }
 
-const commandList: [SectionKey, [CommandKey, CommandFunction][]][] = [
+const commandList: [SectionKey, [BuiltinCommandKey, CommandFunction][]][] = [
 	[
 		'tab',
 		[
@@ -125,15 +127,39 @@ const commandList: [SectionKey, [CommandKey, CommandFunction][]][] = [
 		],
 	],
 ]
-const commandMap = new Map(commandList.flatMap(([_, items]) => items))
+const commandMap = new Map<CommandKey, CommandFunction>(
+	commandList.flatMap(([_, items]) => items),
+)
 
-export function getCommandKeys() {
-	return commandList.map(
-		([section, items]) =>
-			[section, items.map(([key]) => key)] as [SectionKey, CommandKey[]],
-	)
+export interface CommandSection {
+	category: string
+	items: { id: CommandKey; label: string }[]
 }
 
-export function getCommandFunction(key: CommandKey) {
-	return commandMap.get(key)
+/** The commands this extension implements, then everything the browser and the
+ * installed extensions expose, grouped by the category each reports. */
+export async function getCommandList(): Promise<CommandSection[]> {
+	const sections: CommandSection[] = commandList.map(([section, items]) => ({
+		category: M[section],
+		items: items.map(([id]) => ({ id, label: M[id] })),
+	}))
+
+	const dynamic = new Map<string, CommandSection['items']>()
+	for (const { id, label, category } of await browser.browserCommands.getAll())
+		mapInsert(dynamic, category ?? M.otherCommands, () => []).push({
+			id,
+			label,
+		})
+	for (const [category, items] of dynamic) sections.push({ category, items })
+
+	return sections
+}
+
+export function getCommandFunction(key: CommandKey): CommandFunction {
+	return (
+		commandMap.get(key) ??
+		((windowId) => {
+			void browser.browserCommands.run(key, windowId)
+		})
+	)
 }
